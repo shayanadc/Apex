@@ -1,0 +1,24 @@
+# Dependencies and compiled output
+node_modules
+dist
+
+# Environment files
+.env
+.env.example
+
+# Version control
+.git
+.gitignore
+
+# Dev config — ESLint
+eslint.config.js
+
+# Dev config — Prettier
+.prettierrc
+.prettierignore
+
+# Dev config — Husky
+.husky
+
+# Documentation
+*.md
