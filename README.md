@@ -7,7 +7,8 @@ A production-grade RESTful User Management API built with TypeScript, Hono, and 
 ## Features
 
 - **Health check endpoint** — `GET /health` returns server status with a JSON:API response
-- **JSON:API compliant responses** — all endpoints respond with `Content-Type: application/vnd.api+json`
+- **List users endpoint** — `GET /api/users` returns all users in JSON:API format
+- **JSON:API-inspired responses** — all endpoints respond with `Content-Type: application/vnd.api+json`; user resources use a flat `{ data: [...] }` shape (no `type`/`attributes` nesting)
 - **Environment variable support** — server port (and future config) is loaded from `.env` via `dotenv`
 - **Docker support** — multi-stage Dockerfile and `docker-compose.yml` for containerised local development and deployment
 
@@ -21,7 +22,10 @@ The project follows Hexagonal (Ports & Adapters) architecture to keep business l
 src/
 ├── domain/          # Entities, port interfaces — no framework or DB imports allowed here
 ├── application/     # Use cases — orchestrate domain logic, depend only on ports
-├── adapters/        # HTTP controllers, validators, persistence implementations
+│   └── ports/       # Output types (e.g. UserView) and driven port interfaces (e.g. IUserRepository)
+├── adapters/
+│   ├── http/        # Hono controllers and handlers
+│   └── persistence/ # In-memory and future DB repository implementations
 ├── infrastructure/  # App bootstrap, database connection wiring
 └── shared/          # Cross-cutting utilities: JSON:API serialiser, error types, constants
 ```
@@ -30,6 +34,8 @@ src/
 - `domain/` and `application/` must never import from `adapters/`, `infrastructure/`, or any external framework
 - Business logic lives exclusively in `domain/` and `application/`
 - Controllers in `adapters/` must not contain business logic
+- Use cases map domain entities to output types (e.g. `UserView`) before returning — domain entities are never exposed to adapters
+- Use cases depend on repository ports (`IUserRepository`) injected via constructor — never on concrete adapters
 
 ---
 
@@ -109,6 +115,14 @@ To stop:
 docker compose down
 ```
 
+### Test
+
+```bash
+npm test
+```
+
+Runs the full Vitest suite. Test files are co-located with their source files.
+
 ### Type-check
 
 ```bash
@@ -186,6 +200,32 @@ Content-Type: application/vnd.api+json
 ```
 
 ---
+
+### Users
+
+| Method | Path | Auth | Description |
+|--------|------|------|-------------|
+| `GET` | `/api/users` | None | Returns all users |
+
+**Response — 200 OK**
+
+```http
+Content-Type: application/vnd.api+json
+
+{
+  "data": [
+    {
+      "id": "1",
+      "name": "John Doe",
+      "email": "john@example.com",
+      "role": "USER",
+      "accessToken": "token-1"
+    }
+  ]
+}
+```
+
+
 
 ## Configuration
 
