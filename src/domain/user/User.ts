@@ -1,50 +1,78 @@
+export type Role = 'USER' | 'ADMIN';
+
 export type UserProps = {
   id: number;
   name: string;
   email: string;
   password: string;
-  role: 'USER' | 'ADMIN';
   accessToken: string;
+  role: Role;
 };
 
 export class User {
   private readonly id: number;
-  private readonly name: string;
-  private readonly email: string;
-  private readonly password: string;
-  private readonly role: 'USER' | 'ADMIN';
-  private readonly accessToken: string;
+  private name: string;
+  private email: string;
+  private accessToken: string;
+  private password: string;
+  private role: Role;
 
   constructor(props: UserProps) {
+    if (!Number.isInteger(props.id) || props.id <= 0) {
+      throw new Error('User id must be a positive integer');
+    }
+    if (!props.name?.trim()) {
+      throw new Error('User name is required');
+    }
+    if (!isValidEmail(props.email)) {
+      throw new Error('User email is invalid');
+    }
+    if (props.role !== 'USER' && props.role !== 'ADMIN') {
+      throw new Error(`Unknown role: ${props.role}`);
+    }
+    if (!props.password?.trim()) {
+      throw new Error('Password hash is required');
+    }
+
     this.id = props.id;
-    this.name = props.name;
-    this.email = props.email;
+    this.name = props.name.trim();
+    this.email = props.email.trim().toLowerCase();
     this.password = props.password;
-    this.role = props.role;
     this.accessToken = props.accessToken;
+    this.role = props.role;
   }
 
-  getId(): number {
-    return this.id;
+  getId(): number { return this.id; }
+  getName(): string { return this.name; }
+  getEmail(): string { return this.email; }
+  getRole(): Role { return this.role; }
+
+
+  rename(name: string): void {
+    const trimmed = name?.trim();
+    if (!trimmed) throw new Error('Name is required');
+    if (trimmed === this.name) return;
+    this.name = trimmed;
   }
 
-  getName(): string {
-    return this.name;
+  changeEmail(email: string): void {
+    const normalized = email?.trim().toLowerCase();
+    if (!normalized || !isValidEmail(normalized)) throw new Error('Invalid email');
+    if (normalized === this.email) return;
+    this.email = normalized;
   }
 
-  getEmail(): string {
-    return this.email;
+  promoteToAdmin(): void {
+    if (this.role === 'ADMIN') throw new Error('User is already an admin');
+    this.role = 'ADMIN';
   }
 
-  getPassword(): string {
-    return this.password;
+  demoteToUser(): void {
+    if (this.role === 'USER') throw new Error('User is already a regular user');
+    this.role = 'USER';
   }
+}
 
-  getRole(): 'USER' | 'ADMIN' {
-    return this.role;
-  }
-
-  getAccessToken(): string {
-    return this.accessToken;
-  }
+function isValidEmail(raw: string): boolean {
+  return /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(raw?.trim().toLowerCase() ?? '');
 }

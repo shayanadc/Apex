@@ -25,7 +25,13 @@ describe('ListUsersUseCase', () => {
     ];
 
     const mockFindAll = vi.fn().mockResolvedValue(seedUsers);
-    const mockRepo: IUserRepository = { findAll: mockFindAll };
+    const mockRepo: IUserRepository = {
+      findAll: mockFindAll,
+      findById: vi.fn(),
+      findByEmail: vi.fn(),
+      update: vi.fn(),
+      delete: vi.fn().mockResolvedValue(undefined),
+    };
 
     const useCase = new ListUsersUseCase(mockRepo);
     const result = await useCase.execute();

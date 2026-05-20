@@ -8,6 +8,9 @@ A production-grade RESTful User Management API built with TypeScript, Hono, and 
 
 - **Health check endpoint** — `GET /health` returns server status with a JSON:API response
 - **List users endpoint** — `GET /api/users` returns all users in JSON:API format
+- **Get user by ID endpoint** — `GET /api/users/:id` returns a single user; 404 if not found, 422 if the id is non-numeric
+- **Update user by ID endpoint** — `PATCH /api/users/:id` partially updates `name`, `email`, or `role`; 200 on success, 404 if not found, 422 for invalid id / empty patch / email conflict
+- **Delete user by ID endpoint** — `DELETE /api/users/:id` removes a user; 204 No Content on success, 404 if not found, 422 if the id is non-numeric
 - **JSON:API-inspired responses** — all endpoints respond with `Content-Type: application/vnd.api+json`; user resources use a flat `{ data: [...] }` shape (no `type`/`attributes` nesting)
 - **Environment variable support** — server port (and future config) is loaded from `.env` via `dotenv`
 - **Docker support** — multi-stage Dockerfile and `docker-compose.yml` for containerised local development and deployment
@@ -206,8 +209,11 @@ Content-Type: application/vnd.api+json
 | Method | Path | Auth | Description |
 |--------|------|------|-------------|
 | `GET` | `/api/users` | None | Returns all users |
+| `GET` | `/api/users/:id` | None | Returns a single user by numeric ID |
+| `PATCH` | `/api/users/:id` | None | Partially updates a user (`name`, `email`, `role`) |
+| `DELETE` | `/api/users/:id` | None | Deletes a user by numeric ID |
 
-**Response — 200 OK**
+**Response — 200 OK** (`GET /api/users`)
 
 ```http
 Content-Type: application/vnd.api+json
@@ -215,15 +221,106 @@ Content-Type: application/vnd.api+json
 {
   "data": [
     {
-      "id": "1",
+      "id": 1,
       "name": "John Doe",
       "email": "john@example.com",
-      "role": "USER",
-      "accessToken": "token-1"
+      "role": "USER"
     }
   ]
 }
 ```
+
+**Response — 200 OK** (`GET /api/users/:id`)
+
+```http
+Content-Type: application/vnd.api+json
+
+{
+  "data": {
+    "id": 1,
+    "name": "John Doe",
+    "email": "john@example.com",
+    "role": "USER"
+  }
+}
+```
+
+**Response — 404 Not Found**
+
+```http
+Content-Type: application/vnd.api+json
+
+{
+  "errors": [{ "status": "404", "title": "Not Found", "detail": "User with id 99 not found" }]
+}
+```
+
+**Response — 422 Unprocessable Entity** (non-numeric id)
+
+```http
+Content-Type: application/vnd.api+json
+
+{
+  "errors": [{ "status": "422", "title": "Unprocessable Entity", "detail": "Invalid user id" }]
+}
+```
+
+---
+
+### `PATCH /api/users/:id`
+
+Partially updates `name`, `email`, and/or `role` for the user with the given ID. At least one field must be provided.
+
+**Request body**
+
+```http
+Content-Type: application/json
+
+{
+  "name": "New Name",
+  "email": "new@example.com",
+  "role": "ADMIN"
+}
+```
+
+All fields are optional, but at least one must be present.
+
+**Response — 200 OK**
+
+```http
+Content-Type: application/vnd.api+json
+
+{
+  "data": {
+    "id": 1,
+    "name": "New Name",
+    "email": "new@example.com",
+    "role": "ADMIN"
+  }
+}
+```
+
+**Response — 404 Not Found** — user id does not exist
+
+**Response — 422 Unprocessable Entity** — non-numeric id, empty patch body, or email already used by another user
+
+
+
+---
+
+### `DELETE /api/users/:id`
+
+Removes the user with the given numeric ID. Returns no body on success.
+
+**Response — 204 No Content**
+
+```http
+(empty body)
+```
+
+**Response — 404 Not Found** — user id does not exist
+
+**Response — 422 Unprocessable Entity** — non-numeric id
 
 
 
