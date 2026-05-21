@@ -1,7 +1,7 @@
 import 'dotenv/config';
 import { serve } from '@hono/node-server';
 import { createContainer } from './composition/container.js';
-import { Router } from './adapters/http/router.js';
+import { Router } from './adapters/inbound/http/Router.js';
 
 const port = Number(process.env.PORT) || 3000;
 

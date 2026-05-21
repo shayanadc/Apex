@@ -1,5 +1,5 @@
-import type { IUserRepository } from '../ports/IUserRepository.js';
-import type { UserView } from '../ports/UserView.js';
+import type { IUserRepository } from '../ports/outbound/IUserRepository.js';
+import type { UserView } from '../ports/inbound/UserView.js';
 import { UserNotFoundError } from '../errors/UserNotFoundError.js';
 
 export class GetUserUseCase {

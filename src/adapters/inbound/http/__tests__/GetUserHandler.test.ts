@@ -1,8 +1,8 @@
 import { describe, it, expect } from 'vitest';
 import { Hono } from 'hono';
-import { GetUserHandler } from '../http/handlers/GetUserHandler.js';
-import { GetUserUseCase } from '../../application/usecases/GetUserUseCase.js';
-import { InMemoryUserRepository } from '../persistence/InMemoryUserRepository.js';
+import { GetUserHandler } from '../handlers/GetUserHandler.js';
+import { GetUserUseCase } from '../../../../application/usecases/GetUserUseCase.js';
+import { InMemoryUserRepository } from '../../../outbound/persistence/InMemoryUserRepository.js';
 
 describe('GetUserHandler', () => {
   const app = new Hono();

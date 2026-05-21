@@ -1,11 +1,11 @@
 import { describe, it, expect, vi } from 'vitest';
 import { Hono } from 'hono';
-import { UpdateUserHandler } from '../http/handlers/UpdateUserHandler.js';
-import { UpdateUserUseCase } from '../../application/usecases/UpdateUserUseCase.js';
-import { UserNotFoundError } from '../../application/errors/UserNotFoundError.js';
-import { EmailAlreadyInUseError } from '../../domain/user/errors/EmailAlreadyInUseError.js';
-import { EmptyPatchError } from '../../application/errors/EmptyPatchError.js';
-import { InMemoryUserRepository } from '../persistence/InMemoryUserRepository.js';
+import { UpdateUserHandler } from '../handlers/UpdateUserHandler.js';
+import { UpdateUserUseCase } from '../../../../application/usecases/UpdateUserUseCase.js';
+import { UserNotFoundError } from '../../../../application/errors/UserNotFoundError.js';
+import { EmailAlreadyInUseError } from '../../../../domain/user/errors/EmailAlreadyInUseError.js';
+import { EmptyPatchError } from '../../../../application/errors/EmptyPatchError.js';
+import { InMemoryUserRepository } from '../../../outbound/persistence/InMemoryUserRepository.js';
 
 const makeApp = (useCase: UpdateUserUseCase): Hono => {
   const app = new Hono();

@@ -1,9 +1,9 @@
-import { AppError } from '../../application/errors/AppError.js';
-import { UserNotFoundError } from '../../application/errors/UserNotFoundError.js';
-import { EmptyPatchError } from '../../application/errors/EmptyPatchError.js';
-import { EmailAlreadyInUseError } from '../../domain/user/errors/EmailAlreadyInUseError.js';
-import { InvalidUserError } from '../../domain/user/errors/InvalidUserError.js';
-import { RoleTransitionError } from '../../domain/user/errors/RoleTransitionError.js';
+import { AppError } from '../../../application/errors/AppError.js';
+import { UserNotFoundError } from '../../../application/errors/UserNotFoundError.js';
+import { EmptyPatchError } from '../../../application/errors/EmptyPatchError.js';
+import { EmailAlreadyInUseError } from '../../../domain/user/errors/EmailAlreadyInUseError.js';
+import { InvalidUserError } from '../../../domain/user/errors/InvalidUserError.js';
+import { RoleTransitionError } from '../../../domain/user/errors/RoleTransitionError.js';
 import { RequestValidationError } from './RequestValidationError.js';
 import { STATUS_TITLES } from './ErrorTranslator.js';
 import type {

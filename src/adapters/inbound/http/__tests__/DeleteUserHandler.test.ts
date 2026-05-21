@@ -1,9 +1,9 @@
 import { describe, it, expect, vi } from 'vitest';
 import { Hono } from 'hono';
-import { DeleteUserHandler } from '../http/handlers/DeleteUserHandler.js';
-import { DeleteUserUseCase } from '../../application/usecases/DeleteUserUseCase.js';
-import { UserNotFoundError } from '../../application/errors/UserNotFoundError.js';
-import { InMemoryUserRepository } from '../persistence/InMemoryUserRepository.js';
+import { DeleteUserHandler } from '../handlers/DeleteUserHandler.js';
+import { DeleteUserUseCase } from '../../../../application/usecases/DeleteUserUseCase.js';
+import { UserNotFoundError } from '../../../../application/errors/UserNotFoundError.js';
+import { InMemoryUserRepository } from '../../../outbound/persistence/InMemoryUserRepository.js';
 
 const makeApp = (useCase: DeleteUserUseCase): Hono => {
   const app = new Hono();

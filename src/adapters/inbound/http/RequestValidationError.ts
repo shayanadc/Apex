@@ -1,4 +1,4 @@
-import { AppError } from '../../application/errors/AppError.js';
+import { AppError } from '../../../application/errors/AppError.js';
 
 /**
  * Adapter error: a request component (route param, query, body field)

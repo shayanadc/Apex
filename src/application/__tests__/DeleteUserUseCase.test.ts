@@ -1,6 +1,6 @@
 import { describe, it, expect, vi } from 'vitest';
 import { DeleteUserUseCase } from '../usecases/DeleteUserUseCase.js';
-import type { IUserRepository } from '../ports/IUserRepository.js';
+import type { IUserRepository } from '../ports/outbound/IUserRepository.js';
 import { User } from '../../domain/user/User.js';
 import { UserNotFoundError } from '../errors/UserNotFoundError.js';
 

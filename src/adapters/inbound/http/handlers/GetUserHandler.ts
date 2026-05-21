@@ -1,5 +1,5 @@
 import type { Context } from 'hono';
-import type { GetUserUseCase } from '../../../application/usecases/GetUserUseCase.js';
+import type { GetUserUseCase } from '../../../../application/usecases/GetUserUseCase.js';
 import { BaseHttpHandler } from '../BaseHttpHandler.js';
 
 export class GetUserHandler extends BaseHttpHandler {

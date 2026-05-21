@@ -1,12 +1,12 @@
-import { ListUsersHandler } from '../adapters/http/handlers/ListUsersHandler.js';
-import { GetUserHandler } from '../adapters/http/handlers/GetUserHandler.js';
-import { UpdateUserHandler } from '../adapters/http/handlers/UpdateUserHandler.js';
-import { DeleteUserHandler } from '../adapters/http/handlers/DeleteUserHandler.js';
+import { ListUsersHandler } from '../adapters/inbound/http/handlers/ListUsersHandler.js';
+import { GetUserHandler } from '../adapters/inbound/http/handlers/GetUserHandler.js';
+import { UpdateUserHandler } from '../adapters/inbound/http/handlers/UpdateUserHandler.js';
+import { DeleteUserHandler } from '../adapters/inbound/http/handlers/DeleteUserHandler.js';
 import { ListUsersUseCase } from '../application/usecases/ListUsersUseCase.js';
 import { GetUserUseCase } from '../application/usecases/GetUserUseCase.js';
 import { UpdateUserUseCase } from '../application/usecases/UpdateUserUseCase.js';
 import { DeleteUserUseCase } from '../application/usecases/DeleteUserUseCase.js';
-import { InMemoryUserRepository } from '../adapters/persistence/InMemoryUserRepository.js';
+import { InMemoryUserRepository } from '../adapters/outbound/persistence/InMemoryUserRepository.js';
 
 /**
  * The wired-up HTTP handlers the router needs to serve requests.

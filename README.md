@@ -23,26 +23,32 @@ The project follows Hexagonal (Ports & Adapters) architecture to keep business l
 
 ```
 src/
-├── domain/          # Entities, port interfaces — no framework or DB imports allowed here
-├── application/     # Application layer — orchestrates domain logic, depends only on ports
-│   ├── usecases/    # Use cases (e.g. ListUsersUseCase, GetUserUseCase)
-│   ├── ports/       # Output types (e.g. UserView) and driven port interfaces (e.g. IUserRepository)
-│   ├── errors/      # Application-layer error types
-│   └── __tests__/   # Use-case unit tests
+├── domain/                  # Entities and domain error types — no framework or DB imports allowed here
+├── application/             # Application layer — orchestrates domain logic, depends only on ports
+│   ├── usecases/            # Use cases (e.g. ListUsersUseCase, GetUserUseCase)
+│   ├── ports/
+│   │   ├── inbound/         # Use-case I/O contracts (e.g. UpdateUserCommand, UserView)
+│   │   └── outbound/        # Driven port interfaces (e.g. IUserRepository)
+│   ├── errors/              # Application-layer error types
+│   └── __tests__/           # Use-case unit tests
 ├── adapters/
-│   ├── http/        # Hono controllers and handlers
-│   ├── persistence/ # In-memory and future DB repository implementations
-│   └── __tests__/   # HTTP handler tests
-├── infrastructure/  # App bootstrap, database connection wiring
-└── shared/          # Cross-cutting utilities: JSON:API serialiser, error types, constants
+│   ├── inbound/             # Driving adapters — drive the application
+│   │   └── http/            # Hono router and request handlers (+ __tests__/)
+│   └── outbound/            # Driven adapters — driven by the application
+│       └── persistence/     # In-memory and future DB repository implementations
+├── composition/             # Composition root — wires adapters, use cases, and handlers
+└── index.ts                 # Bootstrap entry point
 ```
 
+Adapters and ports are split by direction: **inbound** (driving) elements receive input and drive the application; **outbound** (driven) elements are invoked by the application to reach infrastructure.
+
 **Layer rules:**
-- `domain/` and `application/` must never import from `adapters/`, `infrastructure/`, or any external framework
+- `domain/` and `application/` must never import from `adapters/` or any external framework
 - Business logic lives exclusively in `domain/` and `application/`
 - Controllers in `adapters/` must not contain business logic
 - Use cases map domain entities to output types (e.g. `UserView`) before returning — domain entities are never exposed to adapters
-- Use cases depend on repository ports (`IUserRepository`) injected via constructor — never on concrete adapters
+- Use cases depend on outbound ports (`IUserRepository`) injected via constructor — never on concrete adapters
+- Inbound adapters (HTTP handlers) drive use cases through inbound port contracts (`UpdateUserCommand`, `UserView`)
 
 ---
 
@@ -128,7 +134,7 @@ docker compose down
 npm test
 ```
 
-Runs the full Vitest suite. Test files live in a per-layer `__tests__/` directory — `src/application/__tests__/` for use cases and `src/adapters/__tests__/` for HTTP handlers. Vitest discovers `*.test.ts` by glob, so no runner config is needed.
+Runs the full Vitest suite. Test files live in a per-layer `__tests__/` directory — `src/application/__tests__/` for use cases and `src/adapters/inbound/http/__tests__/` for HTTP handlers. Vitest discovers `*.test.ts` by glob, so no runner config is needed.
 
 ### Type-check
 

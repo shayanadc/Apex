@@ -1,6 +1,6 @@
-import { User } from '../../domain/user/User.js';
-import type { IUserRepository } from '../../application/ports/IUserRepository.js';
-import { UserNotFoundError } from '../../application/errors/UserNotFoundError.js';
+import { User } from '../../../domain/user/User.js';
+import type { IUserRepository } from '../../../application/ports/outbound/IUserRepository.js';
+import { UserNotFoundError } from '../../../application/errors/UserNotFoundError.js';
 
 export class InMemoryUserRepository implements IUserRepository {
   private readonly users: User[];

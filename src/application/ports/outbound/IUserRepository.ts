@@ -1,4 +1,4 @@
-import type { User } from '../../domain/user/User.js';
+import type { User } from '../../../domain/user/User.js';
 
 /**
  * Persistence port for the User aggregate.

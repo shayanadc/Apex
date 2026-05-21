@@ -1,4 +1,4 @@
-import type { IUserRepository } from '../ports/IUserRepository.js';
+import type { IUserRepository } from '../ports/outbound/IUserRepository.js';
 import { UserNotFoundError } from '../errors/UserNotFoundError.js';
 
 export class DeleteUserUseCase {

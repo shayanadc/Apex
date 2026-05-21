@@ -1,6 +1,6 @@
-import type { IUserRepository } from '../ports/IUserRepository.js';
-import type { UserView } from '../ports/UserView.js';
-import type { UpdateUserCommand } from '../ports/UpdateUserCommand.js';
+import type { IUserRepository } from '../ports/outbound/IUserRepository.js';
+import type { UserView } from '../ports/inbound/UserView.js';
+import type { UpdateUserCommand } from '../ports/inbound/UpdateUserCommand.js';
 import { UserNotFoundError } from '../errors/UserNotFoundError.js';
 import { EmptyPatchError } from '../errors/EmptyPatchError.js';
 import { EmailAlreadyInUseError } from '../../domain/user/errors/EmailAlreadyInUseError.js';

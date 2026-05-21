@@ -1,5 +1,5 @@
 import { Hono } from 'hono';
-import type { Container } from '../../composition/container.js';
+import type { Container } from '../../../composition/container.js';
 
 /**
  * Maps every route to its handler. Routing is the only concern here —
