@@ -3,8 +3,8 @@ import { Hono } from 'hono';
 import { UpdateUserHandler } from './UpdateUserHandler.js';
 import { UpdateUserUseCase } from '../../../application/UpdateUserUseCase.js';
 import { UserNotFoundError } from '../../../application/errors/UserNotFoundError.js';
-import { EmailAlreadyInUseError } from '../../../shared/errors/EmailAlreadyInUseError.js';
-import { EmptyPatchError } from '../../../shared/errors/EmptyPatchError.js';
+import { EmailAlreadyInUseError } from '../../../domain/user/errors/EmailAlreadyInUseError.js';
+import { EmptyPatchError } from '../../../application/errors/EmptyPatchError.js';
 import { InMemoryUserRepository } from '../../persistence/InMemoryUserRepository.js';
 
 const makeApp = (useCase: UpdateUserUseCase): Hono => {

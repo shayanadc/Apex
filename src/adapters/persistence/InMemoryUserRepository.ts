@@ -62,10 +62,11 @@ export class InMemoryUserRepository implements IUserRepository {
   delete(id: number): Promise<void> {
     const index = this.users.findIndex((u) => u.getId() === id);
 
-    if (index !== -1) {
-      this.users.splice(index, 1);
+    if (index === -1) {
+      throw new UserNotFoundError(id);
     }
 
+    this.users.splice(index, 1);
     return Promise.resolve();
   }
 }

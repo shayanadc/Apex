@@ -1,61 +1,68 @@
-import { AppError } from '../../shared/errors/AppError.js';
+import { AppError } from '../../application/errors/AppError.js';
+import { UserNotFoundError } from '../../application/errors/UserNotFoundError.js';
+import { EmptyPatchError } from '../../application/errors/EmptyPatchError.js';
+import { EmailAlreadyInUseError } from '../../domain/user/errors/EmailAlreadyInUseError.js';
+import { InvalidUserError } from '../../domain/user/errors/InvalidUserError.js';
+import { RoleTransitionError } from '../../domain/user/errors/RoleTransitionError.js';
+import { RequestValidationError } from './RequestValidationError.js';
+import { STATUS_TITLES } from './ErrorTranslator.js';
+import type {
+  ErrorTranslator,
+  TranslatedError,
+  HttpStatus,
+  ErrorResponse,
+  JsonApiError,
+} from './ErrorTranslator.js';
 
-type HttpStatus = 404 | 422 | 500;
-type MappedStatus = Exclude<HttpStatus, 500>;
-
-const STATUS_TITLES = {
-  404: 'Not Found',
-  422: 'Unprocessable Entity',
-  500: 'Internal Server Error',
-} as const satisfies Record<HttpStatus, string>;
-
-type JsonApiError = {
-  status: `${HttpStatus}`;
-  title: (typeof STATUS_TITLES)[HttpStatus];
-  detail: string;
-};
-
-export type ErrorResponse = {
-  status: HttpStatus;
-  body: { errors: JsonApiError[] };
-};
+type MappableStatus = Exclude<HttpStatus, 500>;
+type AppErrorClass = new (...args: never[]) => AppError;
 
 /**
- * Boundary translator: maps any thrown value to a sanitized JSON:API
- * error response. Stack traces, causes, and internal details are never
- * exposed — unmapped codes and non-AppError values fall through to 500.
+ * Boundary translator: maps a thrown value to a sanitized JSON:API error.
+ *
+ * The status is keyed on the concrete error type, so inner layers never
+ * carry a transport-shaped classification. This adapter — which already
+ * depends on those layers — owns the mapping. An unlisted error becomes a
+ * generic 500.
  */
-export class HttpErrorTranslator {
-  private readonly codeMap: ReadonlyMap<string, MappedStatus> = new Map([
-    ['USER_NOT_FOUND', 404],
-    ['INVALID_INPUT', 422],
-    ['EMAIL_ALREADY_IN_USE', 422],
-    ['EMPTY_PATCH', 422],
-  ]);
+export class HttpErrorTranslator implements ErrorTranslator {
+  private static readonly STATUS_RULES: ReadonlyArray<readonly [AppErrorClass, MappableStatus]> = [
+    [UserNotFoundError, 404],
+    [EmailAlreadyInUseError, 422],
+    [EmptyPatchError, 422],
+    [InvalidUserError, 422],
+    [RoleTransitionError, 422],
+    [RequestValidationError, 422],
+  ];
 
-  translate(error: unknown): ErrorResponse {
+  translate(error: unknown): TranslatedError {
     if (AppError.isAppError(error)) {
-      const status = this.codeMap.get(error.code);
-      if (status !== undefined) {
-        return this.buildResponse(status, error.message);
+      for (const [ErrorType, status] of HttpErrorTranslator.STATUS_RULES) {
+        if (error instanceof ErrorType) {
+          return {
+            response: this.buildResponse(status, error.message),
+            originalError: error,
+          };
+        }
       }
     }
 
-    return this.buildResponse(500, 'An unexpected error occurred');
+    return {
+      response: this.buildResponse(500, 'An unexpected error occurred'),
+      originalError: error,
+    };
   }
 
   private buildResponse(status: HttpStatus, detail: string): ErrorResponse {
+    const jsonApiError = {
+      status: `${status}` as const,
+      title: STATUS_TITLES[status],
+      detail,
+    } as JsonApiError;
+
     return {
       status,
-      body: {
-        errors: [
-          {
-            status: `${status}`,
-            title: STATUS_TITLES[status],
-            detail,
-          },
-        ],
-      },
+      body: { errors: [jsonApiError] },
     };
   }
 }

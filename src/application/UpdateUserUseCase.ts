@@ -2,8 +2,8 @@ import type { IUserRepository } from './ports/IUserRepository.js';
 import type { UserView } from './ports/UserView.js';
 import type { UpdateUserCommand } from './ports/UpdateUserCommand.js';
 import { UserNotFoundError } from './errors/UserNotFoundError.js';
-import { EmptyPatchError } from '../shared/errors/EmptyPatchError.js';
-import { EmailAlreadyInUseError } from '../shared/errors/EmailAlreadyInUseError.js';
+import { EmptyPatchError } from './errors/EmptyPatchError.js';
+import { EmailAlreadyInUseError } from '../domain/user/errors/EmailAlreadyInUseError.js';
 
 export class UpdateUserUseCase {
   constructor(private readonly userRepository: IUserRepository) {}
