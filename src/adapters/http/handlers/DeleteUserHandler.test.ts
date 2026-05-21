@@ -1,7 +1,7 @@
 import { describe, it, expect, vi } from 'vitest';
 import { Hono } from 'hono';
 import { DeleteUserHandler } from './DeleteUserHandler.js';
-import { DeleteUserUseCase } from '../../../application/DeleteUserUseCase.js';
+import { DeleteUserUseCase } from '../../../application/usecases/DeleteUserUseCase.js';
 import { UserNotFoundError } from '../../../application/errors/UserNotFoundError.js';
 import { InMemoryUserRepository } from '../../persistence/InMemoryUserRepository.js';
 

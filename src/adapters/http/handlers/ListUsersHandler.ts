@@ -1,5 +1,5 @@
 import type { Context } from 'hono';
-import type { ListUsersUseCase } from '../../../application/ListUsersUseCase.js';
+import type { ListUsersUseCase } from '../../../application/usecases/ListUsersUseCase.js';
 import type { UserView } from '../../../application/ports/UserView.js';
 import { BaseHttpHandler } from '../BaseHttpHandler.js';
 

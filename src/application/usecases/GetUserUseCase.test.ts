@@ -1,8 +1,8 @@
 import { describe, it, expect, vi } from 'vitest';
 import { GetUserUseCase } from './GetUserUseCase.js';
-import type { IUserRepository } from './ports/IUserRepository.js';
-import { User } from '../domain/user/User.js';
-import { UserNotFoundError } from './errors/UserNotFoundError.js';
+import type { IUserRepository } from '../ports/IUserRepository.js';
+import { User } from '../../domain/user/User.js';
+import { UserNotFoundError } from '../errors/UserNotFoundError.js';
 
 describe('GetUserUseCase', () => {
   const mockUser = new User({

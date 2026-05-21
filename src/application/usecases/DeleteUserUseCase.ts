@@ -1,5 +1,5 @@
-import type { IUserRepository } from './ports/IUserRepository.js';
-import { UserNotFoundError } from './errors/UserNotFoundError.js';
+import type { IUserRepository } from '../ports/IUserRepository.js';
+import { UserNotFoundError } from '../errors/UserNotFoundError.js';
 
 export class DeleteUserUseCase {
   constructor(private readonly userRepository: IUserRepository) {}

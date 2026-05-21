@@ -5,10 +5,10 @@ import { ListUsersHandler } from './adapters/http/handlers/ListUsersHandler.js';
 import { GetUserHandler } from './adapters/http/handlers/GetUserHandler.js';
 import { UpdateUserHandler } from './adapters/http/handlers/UpdateUserHandler.js';
 import { DeleteUserHandler } from './adapters/http/handlers/DeleteUserHandler.js';
-import { ListUsersUseCase } from './application/ListUsersUseCase.js';
-import { GetUserUseCase } from './application/GetUserUseCase.js';
-import { UpdateUserUseCase } from './application/UpdateUserUseCase.js';
-import { DeleteUserUseCase } from './application/DeleteUserUseCase.js';
+import { ListUsersUseCase } from './application/usecases/ListUsersUseCase.js';
+import { GetUserUseCase } from './application/usecases/GetUserUseCase.js';
+import { UpdateUserUseCase } from './application/usecases/UpdateUserUseCase.js';
+import { DeleteUserUseCase } from './application/usecases/DeleteUserUseCase.js';
 import { InMemoryUserRepository } from './adapters/persistence/InMemoryUserRepository.js';
 
 const app = new Hono();

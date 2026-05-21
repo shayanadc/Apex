@@ -1,7 +1,7 @@
 import { describe, it, expect } from 'vitest';
 import { Hono } from 'hono';
 import { GetUserHandler } from './GetUserHandler.js';
-import { GetUserUseCase } from '../../../application/GetUserUseCase.js';
+import { GetUserUseCase } from '../../../application/usecases/GetUserUseCase.js';
 import { InMemoryUserRepository } from '../../persistence/InMemoryUserRepository.js';
 
 describe('GetUserHandler', () => {

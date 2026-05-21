@@ -24,8 +24,10 @@ The project follows Hexagonal (Ports & Adapters) architecture to keep business l
 ```
 src/
 ├── domain/          # Entities, port interfaces — no framework or DB imports allowed here
-├── application/     # Use cases — orchestrate domain logic, depend only on ports
-│   └── ports/       # Output types (e.g. UserView) and driven port interfaces (e.g. IUserRepository)
+├── application/     # Application layer — orchestrates domain logic, depends only on ports
+│   ├── usecases/    # Use cases (e.g. ListUsersUseCase, GetUserUseCase)
+│   ├── ports/       # Output types (e.g. UserView) and driven port interfaces (e.g. IUserRepository)
+│   └── errors/      # Application-layer error types
 ├── adapters/
 │   ├── http/        # Hono controllers and handlers
 │   └── persistence/ # In-memory and future DB repository implementations

@@ -1,10 +1,10 @@
 import { describe, it, expect, vi } from 'vitest';
 import { UpdateUserUseCase } from './UpdateUserUseCase.js';
-import type { IUserRepository } from './ports/IUserRepository.js';
-import { User } from '../domain/user/User.js';
-import { UserNotFoundError } from './errors/UserNotFoundError.js';
-import { EmptyPatchError } from './errors/EmptyPatchError.js';
-import { EmailAlreadyInUseError } from '../domain/user/errors/EmailAlreadyInUseError.js';
+import type { IUserRepository } from '../ports/IUserRepository.js';
+import { User } from '../../domain/user/User.js';
+import { UserNotFoundError } from '../errors/UserNotFoundError.js';
+import { EmptyPatchError } from '../errors/EmptyPatchError.js';
+import { EmailAlreadyInUseError } from '../../domain/user/errors/EmailAlreadyInUseError.js';
 
 describe('UpdateUserUseCase', () => {
   const mockUser = new User({

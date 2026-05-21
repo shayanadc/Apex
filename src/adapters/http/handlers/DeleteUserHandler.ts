@@ -1,5 +1,5 @@
 import type { Context } from 'hono';
-import type { DeleteUserUseCase } from '../../../application/DeleteUserUseCase.js';
+import type { DeleteUserUseCase } from '../../../application/usecases/DeleteUserUseCase.js';
 import { BaseHttpHandler } from '../BaseHttpHandler.js';
 
 export class DeleteUserHandler extends BaseHttpHandler {

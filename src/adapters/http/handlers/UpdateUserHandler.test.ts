@@ -1,7 +1,7 @@
 import { describe, it, expect, vi } from 'vitest';
 import { Hono } from 'hono';
 import { UpdateUserHandler } from './UpdateUserHandler.js';
-import { UpdateUserUseCase } from '../../../application/UpdateUserUseCase.js';
+import { UpdateUserUseCase } from '../../../application/usecases/UpdateUserUseCase.js';
 import { UserNotFoundError } from '../../../application/errors/UserNotFoundError.js';
 import { EmailAlreadyInUseError } from '../../../domain/user/errors/EmailAlreadyInUseError.js';
 import { EmptyPatchError } from '../../../application/errors/EmptyPatchError.js';

@@ -1,7 +1,7 @@
 import { describe, it, expect, vi } from 'vitest';
 import { ListUsersUseCase } from './ListUsersUseCase.js';
-import type { IUserRepository } from './ports/IUserRepository.js';
-import { User } from '../domain/user/User.js';
+import type { IUserRepository } from '../ports/IUserRepository.js';
+import { User } from '../../domain/user/User.js';
 
 describe('ListUsersUseCase', () => {
   it('execute() maps User[] from repository to UserView[]', async () => {

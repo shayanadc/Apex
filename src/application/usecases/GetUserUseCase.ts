@@ -1,6 +1,6 @@
-import type { IUserRepository } from './ports/IUserRepository.js';
-import type { UserView } from './ports/UserView.js';
-import { UserNotFoundError } from './errors/UserNotFoundError.js';
+import type { IUserRepository } from '../ports/IUserRepository.js';
+import type { UserView } from '../ports/UserView.js';
+import { UserNotFoundError } from '../errors/UserNotFoundError.js';
 
 export class GetUserUseCase {
   constructor(private readonly userRepository: IUserRepository) {}
