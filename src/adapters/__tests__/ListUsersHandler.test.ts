@@ -1,8 +1,8 @@
 import { describe, it, expect } from 'vitest';
 import { Hono } from 'hono';
-import { ListUsersHandler } from './ListUsersHandler.js';
-import { ListUsersUseCase } from '../../../application/usecases/ListUsersUseCase.js';
-import { InMemoryUserRepository } from '../../persistence/InMemoryUserRepository.js';
+import { ListUsersHandler } from '../http/handlers/ListUsersHandler.js';
+import { ListUsersUseCase } from '../../application/usecases/ListUsersUseCase.js';
+import { InMemoryUserRepository } from '../persistence/InMemoryUserRepository.js';
 
 describe('ListUsersHandler', () => {
   const app = new Hono();

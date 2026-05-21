@@ -27,10 +27,12 @@ src/
 ├── application/     # Application layer — orchestrates domain logic, depends only on ports
 │   ├── usecases/    # Use cases (e.g. ListUsersUseCase, GetUserUseCase)
 │   ├── ports/       # Output types (e.g. UserView) and driven port interfaces (e.g. IUserRepository)
-│   └── errors/      # Application-layer error types
+│   ├── errors/      # Application-layer error types
+│   └── __tests__/   # Use-case unit tests
 ├── adapters/
 │   ├── http/        # Hono controllers and handlers
-│   └── persistence/ # In-memory and future DB repository implementations
+│   ├── persistence/ # In-memory and future DB repository implementations
+│   └── __tests__/   # HTTP handler tests
 ├── infrastructure/  # App bootstrap, database connection wiring
 └── shared/          # Cross-cutting utilities: JSON:API serialiser, error types, constants
 ```
@@ -126,7 +128,7 @@ docker compose down
 npm test
 ```
 
-Runs the full Vitest suite. Test files are co-located with their source files.
+Runs the full Vitest suite. Test files live in a per-layer `__tests__/` directory — `src/application/__tests__/` for use cases and `src/adapters/__tests__/` for HTTP handlers. Vitest discovers `*.test.ts` by glob, so no runner config is needed.
 
 ### Type-check
 

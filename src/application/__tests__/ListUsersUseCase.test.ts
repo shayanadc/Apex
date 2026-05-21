@@ -1,5 +1,5 @@
 import { describe, it, expect, vi } from 'vitest';
-import { ListUsersUseCase } from './ListUsersUseCase.js';
+import { ListUsersUseCase } from '../usecases/ListUsersUseCase.js';
 import type { IUserRepository } from '../ports/IUserRepository.js';
 import { User } from '../../domain/user/User.js';
 

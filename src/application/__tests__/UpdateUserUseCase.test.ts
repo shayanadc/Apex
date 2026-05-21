@@ -1,5 +1,5 @@
 import { describe, it, expect, vi } from 'vitest';
-import { UpdateUserUseCase } from './UpdateUserUseCase.js';
+import { UpdateUserUseCase } from '../usecases/UpdateUserUseCase.js';
 import type { IUserRepository } from '../ports/IUserRepository.js';
 import { User } from '../../domain/user/User.js';
 import { UserNotFoundError } from '../errors/UserNotFoundError.js';
