@@ -1,6 +1,6 @@
 import { describe, it, expect, beforeEach, afterAll } from 'vitest';
 import { InMemoryUserRepository } from '../../../outbound/persistence/InMemoryUserRepository.js';
-import { TestSeeder } from './__helper__/TestSeeder.js';
+import { TestSeeder, PLAIN_TOKENS } from './__helper__/TestSeeder.js';
 import { TestApp } from './__helper__/TestApp.js';
 
 const repo = new InMemoryUserRepository();
@@ -12,7 +12,9 @@ afterAll(() => seeder.tearDown());
 
 describe('GetUserHandler', () => {
   it('returns 200 with correct JSON:API body for an existing user', async () => {
-    const res = await app.request('/api/users/1');
+    const res = await app.request('/api/users/1', {
+      headers: { Authorization: `Bearer ${PLAIN_TOKENS[1]}` },
+    });
     expect(res.status).toBe(200);
     expect(res.headers.get('Content-Type')).toContain('application/vnd.api+json');
 
@@ -30,7 +32,9 @@ describe('GetUserHandler', () => {
   });
 
   it('returns 404 for a non-existent user id', async () => {
-    const res = await app.request('/api/users/99');
+    const res = await app.request('/api/users/99', {
+      headers: { Authorization: `Bearer ${PLAIN_TOKENS[1]}` },
+    });
     expect(res.status).toBe(404);
     expect(res.headers.get('Content-Type')).toContain('application/vnd.api+json');
 
@@ -41,7 +45,9 @@ describe('GetUserHandler', () => {
   });
 
   it('returns 422 for a non-numeric id', async () => {
-    const res = await app.request('/api/users/abc');
+    const res = await app.request('/api/users/abc', {
+      headers: { Authorization: `Bearer ${PLAIN_TOKENS[1]}` },
+    });
     expect(res.status).toBe(422);
     expect(res.headers.get('Content-Type')).toContain('application/vnd.api+json');
 

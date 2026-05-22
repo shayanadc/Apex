@@ -1,6 +1,6 @@
 import { describe, it, expect, beforeEach, afterAll } from 'vitest';
 import { InMemoryUserRepository } from '../../../outbound/persistence/InMemoryUserRepository.js';
-import { TestSeeder } from './__helper__/TestSeeder.js';
+import { TestSeeder, PLAIN_TOKENS } from './__helper__/TestSeeder.js';
 import { TestApp } from './__helper__/TestApp.js';
 
 const repo = new InMemoryUserRepository();
@@ -14,7 +14,10 @@ describe('UpdateUserHandler', () => {
   it('returns 200 with updated JSON:API body on success', async () => {
     const res = await app.request('/api/users/1', {
       method: 'PATCH',
-      headers: { 'Content-Type': 'application/json' },
+      headers: {
+        'Content-Type': 'application/json',
+        Authorization: `Bearer ${PLAIN_TOKENS[1]}`,
+      },
       body: JSON.stringify({ name: 'Updated Name' }),
     });
 
@@ -29,7 +32,10 @@ describe('UpdateUserHandler', () => {
   it('returns 422 for a non-numeric id', async () => {
     const res = await app.request('/api/users/abc', {
       method: 'PATCH',
-      headers: { 'Content-Type': 'application/json' },
+      headers: {
+        'Content-Type': 'application/json',
+        Authorization: `Bearer ${PLAIN_TOKENS[1]}`,
+      },
       body: JSON.stringify({ name: 'Test' }),
     });
 
@@ -43,7 +49,10 @@ describe('UpdateUserHandler', () => {
   it('returns 404 when user is not found', async () => {
     const res = await app.request('/api/users/99', {
       method: 'PATCH',
-      headers: { 'Content-Type': 'application/json' },
+      headers: {
+        'Content-Type': 'application/json',
+        Authorization: `Bearer ${PLAIN_TOKENS[1]}`,
+      },
       body: JSON.stringify({ name: 'Test' }),
     });
 
@@ -57,7 +66,10 @@ describe('UpdateUserHandler', () => {
   it('returns 422 when email is already in use', async () => {
     const res = await app.request('/api/users/1', {
       method: 'PATCH',
-      headers: { 'Content-Type': 'application/json' },
+      headers: {
+        'Content-Type': 'application/json',
+        Authorization: `Bearer ${PLAIN_TOKENS[1]}`,
+      },
       body: JSON.stringify({ email: 'jane@example.com' }),
     });
 
@@ -71,7 +83,10 @@ describe('UpdateUserHandler', () => {
   it('returns 422 when patch body is empty', async () => {
     const res = await app.request('/api/users/1', {
       method: 'PATCH',
-      headers: { 'Content-Type': 'application/json' },
+      headers: {
+        'Content-Type': 'application/json',
+        Authorization: `Bearer ${PLAIN_TOKENS[1]}`,
+      },
       body: JSON.stringify({}),
     });
 

@@ -1,21 +1,18 @@
 import type { Context } from 'hono';
 import type { ContentfulStatusCode } from 'hono/utils/http-status';
 import { RequestValidationError } from './RequestValidationError.js';
-import type { ErrorTranslator } from './ErrorTranslator.js';
-import { HttpErrorTranslator } from './HttpErrorTranslator.js';
-
-const JSON_API_CONTENT_TYPE = 'application/vnd.api+json';
+import { HttpErrorResponder } from './HttpErrorResponder.js';
+import { JSON_API_CONTENT_TYPE } from './JsonApiMediaType.js';
 
 /**
  *
  * It owns one thing — JSON:API response presentation: the
  * `application/vnd.api+json` media type, status codes, and the try/catch
- * boundary that turns any thrown value into a sanitized error response
- * via the ErrorTranslator.
+ * boundary that hands any thrown value to the `HttpErrorResponder`.
  *
  */
 export abstract class BaseHttpHandler {
-  constructor(protected readonly errorTranslator: ErrorTranslator = new HttpErrorTranslator()) {}
+  constructor(private readonly responder: HttpErrorResponder = new HttpErrorResponder()) {}
 
   /**
    * Public entry point. Wraps `execute()` in the error boundary so a
@@ -25,13 +22,7 @@ export abstract class BaseHttpHandler {
     try {
       return await this.execute(c);
     } catch (error: unknown) {
-      const { response, originalError } = this.errorTranslator.translate(error);
-      if (response.status === 500) {
-        // Unmapped errors become a generic 500 — log the original so it
-        // is not lost behind the sanitized response.
-        console.error('Unhandled error at HTTP boundary:', originalError);
-      }
-      return this.jsonApi(c, response.body, response.status);
+      return this.responder.respond(c, error);
     }
   }
 

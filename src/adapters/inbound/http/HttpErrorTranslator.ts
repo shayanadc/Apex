@@ -5,6 +5,7 @@ import { EmailAlreadyInUseError } from '../../../domain/user/errors/EmailAlready
 import { InvalidUserError } from '../../../domain/user/errors/InvalidUserError.js';
 import { RoleTransitionError } from '../../../domain/user/errors/RoleTransitionError.js';
 import { RequestValidationError } from './RequestValidationError.js';
+import { UnauthorizedError } from './UnauthorizedError.js';
 import { STATUS_TITLES } from './ErrorTranslator.js';
 import type {
   ErrorTranslator,
@@ -27,6 +28,7 @@ type AppErrorClass = new (...args: never[]) => AppError;
  */
 export class HttpErrorTranslator implements ErrorTranslator {
   private static readonly STATUS_RULES: ReadonlyArray<readonly [AppErrorClass, MappableStatus]> = [
+    [UnauthorizedError, 401],
     [UserNotFoundError, 404],
     [EmailAlreadyInUseError, 422],
     [EmptyPatchError, 422],

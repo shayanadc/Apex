@@ -6,7 +6,8 @@ A production-grade RESTful User Management API built with TypeScript, Hono, and 
 
 ## Features
 
-- **Health check endpoint** — `GET /health` returns server status with a JSON:API response
+- **Health check endpoint** — `GET /health` returns server status with a JSON:API response; **not** gated by auth
+- **Bearer token authentication** — all `/api/*` routes require an `Authorization: Bearer <token>` header; missing or invalid tokens return `401 Unauthorized` in JSON:API format
 - **List users endpoint** — `GET /api/users` returns all users in JSON:API format
 - **Get user by ID endpoint** — `GET /api/users/:id` returns a single user; 404 if not found, 422 if the id is non-numeric
 - **Update user by ID endpoint** — `PATCH /api/users/:id` partially updates `name`, `email`, or `role`; 200 on success, 404 if not found, 422 for invalid id / empty patch / email conflict
@@ -236,10 +237,30 @@ Content-Type: application/vnd.api+json
 
 | Method | Path | Auth | Description |
 |--------|------|------|-------------|
-| `GET` | `/api/users` | None | Returns all users |
-| `GET` | `/api/users/:id` | None | Returns a single user by numeric ID |
-| `PATCH` | `/api/users/:id` | None | Partially updates a user (`name`, `email`, `role`) |
-| `DELETE` | `/api/users/:id` | None | Deletes a user by numeric ID |
+| `GET` | `/api/users` | Bearer token | Returns all users |
+| `GET` | `/api/users/:id` | Bearer token | Returns a single user by numeric ID |
+| `PATCH` | `/api/users/:id` | Bearer token | Partially updates a user (`name`, `email`, `role`) |
+| `DELETE` | `/api/users/:id` | Bearer token | Deletes a user by numeric ID |
+
+**Authentication**
+
+All `/api/*` endpoints require an `Authorization` header:
+
+```http
+Authorization: Bearer <raw-token>
+```
+
+The raw token is SHA-256 hashed and compared against the stored hash on the matched user.
+
+**Response — 401 Unauthorized** (missing or invalid token)
+
+```http
+Content-Type: application/vnd.api+json
+
+{
+  "errors": [{ "status": "401", "title": "Unauthorized", "detail": "Missing or malformed Authorization header" }]
+}
+```
 
 **Response — 200 OK** (`GET /api/users`)
 

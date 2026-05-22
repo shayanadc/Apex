@@ -7,6 +7,7 @@ export interface IUserRepository {
   findAll(): Promise<User[]>;
   findById(id: number): Promise<User | null>;
   findByEmail(email: string): Promise<User | null>;
+  findByHashedToken(hash: string): Promise<User | null>;
   /** Persists a new user aggregate. */
   save(user: User): Promise<void>;
   /** @throws {UserNotFoundError} when no user has `user.getId()`. */

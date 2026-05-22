@@ -19,6 +19,11 @@ export class InMemoryUserRepository implements IUserRepository {
     return Promise.resolve(user);
   }
 
+  findByHashedToken(hash: string): Promise<User | null> {
+    const user = this.users.find((u) => u.matchesToken(hash)) ?? null;
+    return Promise.resolve(user);
+  }
+
   save(user: User): Promise<void> {
     this.users.push(user);
     return Promise.resolve();

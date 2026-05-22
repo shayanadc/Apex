@@ -1,5 +1,16 @@
+import { createHash } from 'node:crypto';
 import { User } from '../../../../../domain/user/User.js';
 import type { IUserRepository } from '../../../../../application/ports/outbound/IUserRepository.js';
+
+function sha256(plain: string): string {
+  return createHash('sha256').update(plain).digest('hex');
+}
+
+export const PLAIN_TOKENS: Record<number, string> = {
+  1: 'token-1',
+  2: 'token-2',
+  3: 'token-3',
+};
 
 const SEED_USERS: User[] = [
   new User({
@@ -8,7 +19,7 @@ const SEED_USERS: User[] = [
     email: 'john@example.com',
     password: 'password1',
     role: 'USER',
-    accessToken: 'token-1',
+    accessToken: sha256(PLAIN_TOKENS[1]),
   }),
   new User({
     id: 2,
@@ -16,7 +27,7 @@ const SEED_USERS: User[] = [
     email: 'jane@example.com',
     password: 'password2',
     role: 'ADMIN',
-    accessToken: 'token-2',
+    accessToken: sha256(PLAIN_TOKENS[2]),
   }),
   new User({
     id: 3,
@@ -24,7 +35,7 @@ const SEED_USERS: User[] = [
     email: 'bob@example.com',
     password: 'password3',
     role: 'USER',
-    accessToken: 'token-3',
+    accessToken: sha256(PLAIN_TOKENS[3]),
   }),
 ];
 

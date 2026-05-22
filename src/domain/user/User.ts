@@ -45,11 +45,22 @@ export class User {
     this.role = props.role;
   }
 
-  getId(): number { return this.id; }
-  getName(): string { return this.name; }
-  getEmail(): string { return this.email; }
-  getRole(): Role { return this.role; }
+  getId(): number {
+    return this.id;
+  }
+  getName(): string {
+    return this.name;
+  }
+  getEmail(): string {
+    return this.email;
+  }
+  getRole(): Role {
+    return this.role;
+  }
 
+  matchesToken(hash: string): boolean {
+    return this.accessToken === hash;
+  }
 
   rename(name: string): void {
     const trimmed = name?.trim();

@@ -1,6 +1,6 @@
 import { describe, it, expect, beforeEach, afterAll } from 'vitest';
 import { InMemoryUserRepository } from '../../../outbound/persistence/InMemoryUserRepository.js';
-import { TestSeeder } from './__helper__/TestSeeder.js';
+import { TestSeeder, PLAIN_TOKENS } from './__helper__/TestSeeder.js';
 import { TestApp } from './__helper__/TestApp.js';
 
 const repo = new InMemoryUserRepository();
@@ -12,7 +12,9 @@ afterAll(() => seeder.tearDown());
 
 describe('ListUsersHandler', () => {
   it('returns 200 with JSON:API content type and user data without sensitive fields', async () => {
-    const res = await app.request('/api/users');
+    const res = await app.request('/api/users', {
+      headers: { Authorization: `Bearer ${PLAIN_TOKENS[1]}` },
+    });
     expect(res.status).toBe(200);
     expect(res.headers.get('Content-Type')).toContain('application/vnd.api+json');
 

@@ -1,6 +1,6 @@
 import { describe, it, expect, beforeEach, afterAll } from 'vitest';
 import { InMemoryUserRepository } from '../../../outbound/persistence/InMemoryUserRepository.js';
-import { TestSeeder } from './__helper__/TestSeeder.js';
+import { TestSeeder, PLAIN_TOKENS } from './__helper__/TestSeeder.js';
 import { TestApp } from './__helper__/TestApp.js';
 
 const repo = new InMemoryUserRepository();
@@ -12,14 +12,20 @@ afterAll(() => seeder.tearDown());
 
 describe('DeleteUserHandler', () => {
   it('returns 204 No Content for an existing user id', async () => {
-    const res = await app.request('/api/users/1', { method: 'DELETE' });
+    const res = await app.request('/api/users/1', {
+      method: 'DELETE',
+      headers: { Authorization: `Bearer ${PLAIN_TOKENS[1]}` },
+    });
 
     expect(res.status).toBe(204);
     expect(await res.text()).toBe('');
   });
 
   it('returns 404 JSON:API error for a non-existent user id', async () => {
-    const res = await app.request('/api/users/99', { method: 'DELETE' });
+    const res = await app.request('/api/users/99', {
+      method: 'DELETE',
+      headers: { Authorization: `Bearer ${PLAIN_TOKENS[1]}` },
+    });
 
     expect(res.status).toBe(404);
     expect(res.headers.get('Content-Type')).toContain('application/vnd.api+json');
@@ -30,7 +36,10 @@ describe('DeleteUserHandler', () => {
   });
 
   it('returns 422 JSON:API error for a non-numeric id', async () => {
-    const res = await app.request('/api/users/abc', { method: 'DELETE' });
+    const res = await app.request('/api/users/abc', {
+      method: 'DELETE',
+      headers: { Authorization: `Bearer ${PLAIN_TOKENS[1]}` },
+    });
 
     expect(res.status).toBe(422);
     expect(res.headers.get('Content-Type')).toContain('application/vnd.api+json');
