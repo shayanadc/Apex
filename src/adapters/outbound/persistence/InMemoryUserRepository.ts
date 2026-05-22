@@ -1,41 +1,12 @@
-import { User } from '../../../domain/user/User.js';
+import type { User } from '../../../domain/user/User.js';
 import type { IUserRepository } from '../../../application/ports/outbound/IUserRepository.js';
 import { UserNotFoundError } from '../../../application/errors/UserNotFoundError.js';
 
 export class InMemoryUserRepository implements IUserRepository {
-  private readonly users: User[];
-
-  constructor() {
-    this.users = [
-      new User({
-        id: 1,
-        name: 'John Doe',
-        email: 'john@example.com',
-        password: 'password1',
-        role: 'USER',
-        accessToken: 'token-1',
-      }),
-      new User({
-        id: 2,
-        name: 'Jane Doe',
-        email: 'jane@example.com',
-        password: 'password2',
-        role: 'ADMIN',
-        accessToken: 'token-2',
-      }),
-      new User({
-        id: 3,
-        name: 'Bob Smith',
-        email: 'bob@example.com',
-        password: 'password3',
-        role: 'USER',
-        accessToken: 'token-3',
-      }),
-    ];
-  }
+  private readonly users: User[] = [];
 
   findAll(): Promise<User[]> {
-    return Promise.resolve(this.users);
+    return Promise.resolve([...this.users]);
   }
 
   findById(id: number): Promise<User | null> {
@@ -46,6 +17,11 @@ export class InMemoryUserRepository implements IUserRepository {
   findByEmail(email: string): Promise<User | null> {
     const user = this.users.find((u) => u.getEmail() === email) ?? null;
     return Promise.resolve(user);
+  }
+
+  save(user: User): Promise<void> {
+    this.users.push(user);
+    return Promise.resolve();
   }
 
   update(user: User): Promise<User> {

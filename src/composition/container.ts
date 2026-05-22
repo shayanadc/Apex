@@ -6,7 +6,7 @@ import { ListUsersUseCase } from '../application/usecases/ListUsersUseCase.js';
 import { GetUserUseCase } from '../application/usecases/GetUserUseCase.js';
 import { UpdateUserUseCase } from '../application/usecases/UpdateUserUseCase.js';
 import { DeleteUserUseCase } from '../application/usecases/DeleteUserUseCase.js';
-import { InMemoryUserRepository } from '../adapters/outbound/persistence/InMemoryUserRepository.js';
+import type { IUserRepository } from '../application/ports/outbound/IUserRepository.js';
 
 /**
  * The wired-up HTTP handlers the router needs to serve requests.
@@ -22,9 +22,7 @@ export interface Container {
  * Composition root — the single place where concrete adapters, use cases,
  * and handlers are instantiated and wired together.
  */
-export function createContainer(): Container {
-  const repo = new InMemoryUserRepository();
-
+export function createContainer(repo: IUserRepository): Container {
   return {
     listUsersHandler: new ListUsersHandler(new ListUsersUseCase(repo)),
     getUserHandler: new GetUserHandler(new GetUserUseCase(repo)),

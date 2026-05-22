@@ -13,9 +13,12 @@ export class Router {
     this.registerRoutes();
   }
 
-  /** The configured Hono app, ready to be served. */
   get fetch(): Hono['fetch'] {
     return this.app.fetch;
+  }
+
+  get honoApp(): Hono {
+    return this.app;
   }
 
   private registerRoutes(): void {

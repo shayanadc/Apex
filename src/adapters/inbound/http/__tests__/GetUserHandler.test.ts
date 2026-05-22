@@ -1,14 +1,16 @@
-import { describe, it, expect } from 'vitest';
-import { Hono } from 'hono';
-import { GetUserHandler } from '../handlers/GetUserHandler.js';
-import { GetUserUseCase } from '../../../../application/usecases/GetUserUseCase.js';
+import { describe, it, expect, beforeEach, afterAll } from 'vitest';
 import { InMemoryUserRepository } from '../../../outbound/persistence/InMemoryUserRepository.js';
+import { TestSeeder } from './__helper__/TestSeeder.js';
+import { TestApp } from './__helper__/TestApp.js';
+
+const repo = new InMemoryUserRepository();
+const seeder = new TestSeeder(repo);
+const { app } = new TestApp(repo);
+
+beforeEach(() => seeder.seed());
+afterAll(() => seeder.tearDown());
 
 describe('GetUserHandler', () => {
-  const app = new Hono();
-  const handler = new GetUserHandler(new GetUserUseCase(new InMemoryUserRepository()));
-  app.get('/api/users/:id', (c) => handler.handle(c));
-
   it('returns 200 with correct JSON:API body for an existing user', async () => {
     const res = await app.request('/api/users/1');
     expect(res.status).toBe(200);

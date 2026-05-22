@@ -1,14 +1,16 @@
-import { describe, it, expect } from 'vitest';
-import { Hono } from 'hono';
-import { ListUsersHandler } from '../handlers/ListUsersHandler.js';
-import { ListUsersUseCase } from '../../../../application/usecases/ListUsersUseCase.js';
+import { describe, it, expect, beforeEach, afterAll } from 'vitest';
 import { InMemoryUserRepository } from '../../../outbound/persistence/InMemoryUserRepository.js';
+import { TestSeeder } from './__helper__/TestSeeder.js';
+import { TestApp } from './__helper__/TestApp.js';
+
+const repo = new InMemoryUserRepository();
+const seeder = new TestSeeder(repo);
+const { app } = new TestApp(repo);
+
+beforeEach(() => seeder.seed());
+afterAll(() => seeder.tearDown());
 
 describe('ListUsersHandler', () => {
-  const app = new Hono();
-  const handler = new ListUsersHandler(new ListUsersUseCase(new InMemoryUserRepository()));
-  app.get('/api/users', (c) => handler.handle(c));
-
   it('returns 200 with JSON:API content type and user data without sensitive fields', async () => {
     const res = await app.request('/api/users');
     expect(res.status).toBe(200);

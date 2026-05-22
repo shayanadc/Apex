@@ -134,7 +134,25 @@ docker compose down
 npm test
 ```
 
-Runs the full Vitest suite. Test files live in a per-layer `__tests__/` directory — `src/application/__tests__/` for use cases and `src/adapters/inbound/http/__tests__/` for HTTP handlers. Vitest discovers `*.test.ts` by glob, so no runner config is needed.
+Runs the full Vitest suite. The project uses two distinct test tiers:
+
+**Application layer — unit tests** (`src/application/__tests__/`)
+Use-case tests inject mock `IUserRepository` implementations via `vi.fn()`. They verify business logic in complete isolation — no HTTP, no framework, no real adapter.
+
+**Adapter layer — integration-style tests** (`src/adapters/inbound/http/__tests__/`)
+Handler tests exercise the full Hono application — same `Router`, same middleware stack, same wiring as production — backed by a real `InMemoryUserRepository`. Two helper classes in `__helper__/` support this:
+
+- **`TestApp`** — wires `InMemoryUserRepository → createContainer → Router` and exposes the configured `Hono` app.
+- **`TestSeeder`** — seeds three canonical users before each test via `IUserRepository.save()` and tears them down after all tests via `IUserRepository.delete()`. No mocks or fakes appear in adapter tests.
+
+```ts
+const repo = new InMemoryUserRepository();
+const seeder = new TestSeeder(repo);
+const { app } = new TestApp(repo);
+
+beforeEach(() => seeder.seed());
+afterAll(() => seeder.tearDown());
+```
 
 ### Type-check
 
