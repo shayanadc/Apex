@@ -1,7 +1,7 @@
 import type { Context } from 'hono';
 import { RequestValidationError } from '../errors/RequestValidationError.js';
-import { JsonApiResponder } from './JsonApiResponder.js';
-import { HttpErrorBoundary } from './HttpErrorBoundary.js';
+import { JsonApiResponder } from '../presentation/JsonApiResponder.js';
+import { HttpErrorBoundary } from '../presentation/HttpErrorBoundary.js';
 
 /**
  * Orchestrates the one path every handler follows:

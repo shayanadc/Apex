@@ -1,7 +1,7 @@
 import type { IUserRepository } from '../../../../../application/ports/outbound/IUserRepository.js';
 import { createContainer } from '../../../../../composition/container.js';
 import { AuthMiddleware } from '../../middleware/AuthMiddleware.js';
-import { HttpErrorBoundary } from '../../handlers/HttpErrorBoundary.js';
+import { HttpErrorBoundary } from '../../presentation/HttpErrorBoundary.js';
 import { Router } from '../../Router.js';
 
 /**
