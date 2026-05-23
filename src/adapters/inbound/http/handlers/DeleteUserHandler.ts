@@ -1,6 +1,6 @@
 import type { Context } from 'hono';
 import type { DeleteUserUseCase } from '../../../../application/usecases/DeleteUserUseCase.js';
-import { BaseHttpHandler } from '../BaseHttpHandler.js';
+import { BaseHttpHandler } from './BaseHttpHandler.js';
 
 export class DeleteUserHandler extends BaseHttpHandler {
   constructor(private readonly useCase: DeleteUserUseCase) {
@@ -10,6 +10,6 @@ export class DeleteUserHandler extends BaseHttpHandler {
   protected async execute(c: Context): Promise<Response> {
     const id = this.parseId(c.req.param('id'));
     await this.useCase.execute(id);
-    return this.noContent(c);
+    return this.responder.noContent(c);
   }
 }

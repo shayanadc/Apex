@@ -1,6 +1,6 @@
 import type { Context } from 'hono';
 import type { UpdateUserUseCase } from '../../../../application/usecases/UpdateUserUseCase.js';
-import { BaseHttpHandler } from '../BaseHttpHandler.js';
+import { BaseHttpHandler } from './BaseHttpHandler.js';
 
 export class UpdateUserHandler extends BaseHttpHandler {
   constructor(private readonly useCase: UpdateUserUseCase) {
@@ -17,6 +17,6 @@ export class UpdateUserHandler extends BaseHttpHandler {
     if ('role' in body) patch.role = body.role as 'USER' | 'ADMIN';
 
     const data = await this.useCase.execute(id, patch);
-    return this.ok(c, data);
+    return this.responder.ok(c, data);
   }
 }
