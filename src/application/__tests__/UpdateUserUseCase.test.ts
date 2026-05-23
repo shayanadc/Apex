@@ -1,10 +1,12 @@
 import { describe, it, expect, vi } from 'vitest';
 import { UpdateUserUseCase } from '../usecases/UpdateUserUseCase.js';
-import type { IUserRepository } from '../ports/outbound/IUserRepository.js';
 import { User } from '../../domain/user/User.js';
+import { Role } from '../../domain/user/Role.js';
 import { UserNotFoundError } from '../errors/UserNotFoundError.js';
 import { EmptyPatchError } from '../errors/EmptyPatchError.js';
 import { EmailAlreadyInUseError } from '../../domain/user/errors/EmailAlreadyInUseError.js';
+import { makeMockUserRepository } from './__helper__/makeMockUserRepository.js';
+import type { IUserRepository } from '../ports/outbound/IUserRepository.js';
 
 describe('UpdateUserUseCase', () => {
   const mockUser = new User({
@@ -12,20 +14,19 @@ describe('UpdateUserUseCase', () => {
     name: 'John Doe',
     email: 'john@example.com',
     password: 'password1',
-    role: 'USER',
+    role: Role.USER,
     accessToken: 'token-1',
   });
 
-  const makeMockRepo = (user: User | null): IUserRepository => ({
-    findAll: vi.fn(),
-    findById: vi.fn().mockResolvedValue(user),
-    findByEmail: vi.fn().mockResolvedValue(null),
-    update: vi.fn().mockImplementation((u: User) => Promise.resolve(u)),
-    delete: vi.fn().mockResolvedValue(undefined),
-  });
+  const makeRepo = (user: User | null): IUserRepository =>
+    makeMockUserRepository({
+      findById: vi.fn().mockResolvedValue(user),
+      findByEmail: vi.fn().mockResolvedValue(null),
+      update: vi.fn().mockImplementation((u: User) => Promise.resolve(u)),
+    });
 
   it('returns updated UserView on success', async () => {
-    const repo = makeMockRepo(mockUser);
+    const repo = makeRepo(mockUser);
     const useCase = new UpdateUserUseCase(repo);
 
     const result = await useCase.execute(1, { name: 'Updated Name' });
@@ -41,7 +42,7 @@ describe('UpdateUserUseCase', () => {
   });
 
   it('throws EmptyPatchError when patch has zero keys', async () => {
-    const repo = makeMockRepo(mockUser);
+    const repo = makeRepo(mockUser);
     const useCase = new UpdateUserUseCase(repo);
 
     await expect(useCase.execute(1, {})).rejects.toThrow(EmptyPatchError);
@@ -50,7 +51,7 @@ describe('UpdateUserUseCase', () => {
   });
 
   it('throws UserNotFoundError when user does not exist', async () => {
-    const repo = makeMockRepo(null);
+    const repo = makeRepo(null);
     const useCase = new UpdateUserUseCase(repo);
 
     await expect(useCase.execute(99, { name: 'Test' })).rejects.toThrow(UserNotFoundError);
@@ -61,13 +62,13 @@ describe('UpdateUserUseCase', () => {
   });
 
   it('throws EmailAlreadyInUseError when the email belongs to another user', async () => {
-    const repo = makeMockRepo(mockUser);
+    const repo = makeRepo(mockUser);
     const otherUser = new User({
       id: 2,
       name: 'Jane Doe',
       email: 'taken@example.com',
       password: 'password2',
-      role: 'USER',
+      role: Role.USER,
       accessToken: 'token-2',
     });
     vi.mocked(repo.findByEmail).mockResolvedValue(otherUser);
@@ -83,7 +84,7 @@ describe('UpdateUserUseCase', () => {
   });
 
   it('allows updating to the user own current email', async () => {
-    const repo = makeMockRepo(mockUser);
+    const repo = makeRepo(mockUser);
     vi.mocked(repo.findByEmail).mockResolvedValue(mockUser);
     const useCase = new UpdateUserUseCase(repo);
 

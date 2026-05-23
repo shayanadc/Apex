@@ -28,7 +28,7 @@ export class UpdateUserUseCase {
 
     if (command.name !== undefined) user.rename(command.name);
     if (command.email !== undefined) user.changeEmail(command.email);
-    if (command.role !== undefined && command.role !== user.getRole()) {
+    if (command.role !== undefined && command.role !== user.getRole().getValue()) {
       if (command.role === 'ADMIN') user.promoteToAdmin();
       else user.demoteToUser();
     }
@@ -39,7 +39,7 @@ export class UpdateUserUseCase {
       id: stored.getId(),
       name: stored.getName(),
       email: stored.getEmail(),
-      role: stored.getRole(),
+      role: stored.getRole().getValue(),
     };
   }
 }

@@ -2,7 +2,7 @@ import { createHash } from 'node:crypto';
 import type { Context, Next } from 'hono';
 import type { IUserRepository } from '../../../../application/ports/outbound/IUserRepository.js';
 import type { User } from '../../../../domain/user/User.js';
-import { UnauthorizedError } from '../UnauthorizedError.js';
+import { UnauthorizedError } from '../errors/UnauthorizedError.js';
 
 /**
  * The request-scoped variables this middleware guarantees on the context

@@ -16,7 +16,7 @@ export class GetUserUseCase {
       id: user.getId(),
       name: user.getName(),
       email: user.getEmail(),
-      role: user.getRole(),
+      role: user.getRole().getValue(),
     };
   }
 }

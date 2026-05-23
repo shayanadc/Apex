@@ -1,8 +1,10 @@
 import { describe, it, expect, vi } from 'vitest';
 import { GetUserUseCase } from '../usecases/GetUserUseCase.js';
-import type { IUserRepository } from '../ports/outbound/IUserRepository.js';
 import { User } from '../../domain/user/User.js';
+import { Role } from '../../domain/user/Role.js';
 import { UserNotFoundError } from '../errors/UserNotFoundError.js';
+import { makeMockUserRepository } from './__helper__/makeMockUserRepository.js';
+import type { IUserRepository } from '../ports/outbound/IUserRepository.js';
 
 describe('GetUserUseCase', () => {
   const mockUser = new User({
@@ -10,20 +12,15 @@ describe('GetUserUseCase', () => {
     name: 'John Doe',
     email: 'john@example.com',
     password: 'password1',
-    role: 'USER',
+    role: Role.USER,
     accessToken: 'token-1',
   });
 
-  const makeMockRepo = (user: User | null): IUserRepository => ({
-    findAll: vi.fn(),
-    findById: vi.fn().mockResolvedValue(user),
-    findByEmail: vi.fn(),
-    update: vi.fn(),
-    delete: vi.fn().mockResolvedValue(undefined),
-  });
+  const makeRepo = (user: User | null): IUserRepository =>
+    makeMockUserRepository({ findById: vi.fn().mockResolvedValue(user) });
 
   it('returns a UserView when the user is found', async () => {
-    const repo = makeMockRepo(mockUser);
+    const repo = makeRepo(mockUser);
     const useCase = new GetUserUseCase(repo);
 
     const result = await useCase.execute(1);
@@ -34,7 +31,7 @@ describe('GetUserUseCase', () => {
   });
 
   it('throws UserNotFoundError when the user is not found', async () => {
-    const repo = makeMockRepo(null);
+    const repo = makeRepo(null);
     const useCase = new GetUserUseCase(repo);
 
     await expect(useCase.execute(99)).rejects.toThrow(UserNotFoundError);

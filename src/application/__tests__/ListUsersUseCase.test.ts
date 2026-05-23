@@ -1,7 +1,8 @@
 import { describe, it, expect, vi } from 'vitest';
 import { ListUsersUseCase } from '../usecases/ListUsersUseCase.js';
-import type { IUserRepository } from '../ports/outbound/IUserRepository.js';
 import { User } from '../../domain/user/User.js';
+import { Role } from '../../domain/user/Role.js';
+import { makeMockUserRepository } from './__helper__/makeMockUserRepository.js';
 
 describe('ListUsersUseCase', () => {
   it('execute() maps User[] from repository to UserView[]', async () => {
@@ -11,7 +12,7 @@ describe('ListUsersUseCase', () => {
         name: 'John Doe',
         email: 'john@example.com',
         password: 'password1',
-        role: 'USER',
+        role: Role.USER,
         accessToken: 'token-1',
       }),
       new User({
@@ -19,19 +20,14 @@ describe('ListUsersUseCase', () => {
         name: 'Jane Doe',
         email: 'jane@example.com',
         password: 'password2',
-        role: 'ADMIN',
+        role: Role.ADMIN,
         accessToken: 'token-2',
       }),
     ];
 
-    const mockFindAll = vi.fn().mockResolvedValue(seedUsers);
-    const mockRepo: IUserRepository = {
-      findAll: mockFindAll,
-      findById: vi.fn(),
-      findByEmail: vi.fn(),
-      update: vi.fn(),
-      delete: vi.fn().mockResolvedValue(undefined),
-    };
+    const mockRepo = makeMockUserRepository({
+      findAll: vi.fn().mockResolvedValue(seedUsers),
+    });
 
     const useCase = new ListUsersUseCase(mockRepo);
     const result = await useCase.execute();

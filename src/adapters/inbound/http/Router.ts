@@ -2,7 +2,7 @@ import { Hono } from 'hono';
 import type { Context, MiddlewareHandler, Next } from 'hono';
 import type { Container } from '../../../composition/container.js';
 import type { AuthVariables } from './middleware/AuthMiddleware.js';
-import { JSON_API_CONTENT_TYPE } from './JsonApiMediaType.js';
+import { JSON_API_CONTENT_TYPE } from './handlers/JsonApiResponder.js';
 
 type AppEnv = { Variables: AuthVariables };
 

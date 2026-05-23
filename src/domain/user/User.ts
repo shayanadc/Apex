@@ -1,7 +1,8 @@
 import { InvalidUserError } from './errors/InvalidUserError.js';
 import { RoleTransitionError } from './errors/RoleTransitionError.js';
-
-export type Role = 'USER' | 'ADMIN';
+import { ForbiddenError } from './errors/ForbiddenError.js';
+import { CannotDeleteSelfError } from './errors/CannotDeleteSelfError.js';
+import { Role } from './Role.js';
 
 export type UserProps = {
   id: number;
@@ -29,9 +30,6 @@ export class User {
     }
     if (!isValidEmail(props.email)) {
       throw new InvalidUserError('User email is invalid');
-    }
-    if (props.role !== 'USER' && props.role !== 'ADMIN') {
-      throw new InvalidUserError(`Unknown role: ${props.role}`);
     }
     if (!props.password?.trim()) {
       throw new InvalidUserError('Password hash is required');
@@ -77,13 +75,32 @@ export class User {
   }
 
   promoteToAdmin(): void {
-    if (this.role === 'ADMIN') throw new RoleTransitionError('User is already an admin');
-    this.role = 'ADMIN';
+    if (this.role.isAdmin()) throw new RoleTransitionError('User is already an admin');
+    this.role = Role.ADMIN;
   }
 
   demoteToUser(): void {
-    if (this.role === 'USER') throw new RoleTransitionError('User is already a regular user');
-    this.role = 'USER';
+    if (!this.role.isAdmin()) throw new RoleTransitionError('User is already a regular user');
+    this.role = Role.USER;
+  }
+
+  assertCanView(target: User): void {
+    if (this.role.isAdmin() || this.id === target.id) return;
+    throw new ForbiddenError();
+  }
+
+  assertCanUpdate(target: User): void {
+    if (this.role.isAdmin() || this.id === target.id) return;
+    throw new ForbiddenError();
+  }
+
+  assertCanUpdateRole(_target: User): void {
+    if (!this.role.isAdmin()) throw new ForbiddenError();
+  }
+
+  assertCanDelete(target: User): void {
+    if (this.id === target.id) throw new CannotDeleteSelfError();
+    if (!this.role.isAdmin()) throw new ForbiddenError();
   }
 }
 

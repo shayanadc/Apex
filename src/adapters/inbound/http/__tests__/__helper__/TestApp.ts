@@ -1,7 +1,7 @@
 import type { IUserRepository } from '../../../../../application/ports/outbound/IUserRepository.js';
 import { createContainer } from '../../../../../composition/container.js';
 import { AuthMiddleware } from '../../middleware/AuthMiddleware.js';
-import { HttpErrorResponder } from '../../HttpErrorResponder.js';
+import { HttpErrorBoundary } from '../../handlers/HttpErrorBoundary.js';
 import { Router } from '../../Router.js';
 
 /**
@@ -13,10 +13,10 @@ export class TestApp {
   readonly app: Router['honoApp'];
 
   constructor(repo: IUserRepository) {
-    const errorResponder = new HttpErrorResponder();
+    const errorBoundary = new HttpErrorBoundary();
 
     this.app = new Router(createContainer(repo))
-      .onError((err, c) => errorResponder.respond(c, err))
+      .onError((err, c) => errorBoundary.handle(c, err))
       .use('/api/*', (c, next) => new AuthMiddleware(repo).handle(c, next))
       .build().honoApp;
   }

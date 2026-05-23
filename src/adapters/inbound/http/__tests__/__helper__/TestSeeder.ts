@@ -1,5 +1,6 @@
 import { createHash } from 'node:crypto';
 import { User } from '../../../../../domain/user/User.js';
+import { Role } from '../../../../../domain/user/Role.js';
 import type { IUserRepository } from '../../../../../application/ports/outbound/IUserRepository.js';
 
 function sha256(plain: string): string {
@@ -18,7 +19,7 @@ const SEED_USERS: User[] = [
     name: 'John Doe',
     email: 'john@example.com',
     password: 'password1',
-    role: 'USER',
+    role: Role.USER,
     accessToken: sha256(PLAIN_TOKENS[1]),
   }),
   new User({
@@ -26,7 +27,7 @@ const SEED_USERS: User[] = [
     name: 'Jane Doe',
     email: 'jane@example.com',
     password: 'password2',
-    role: 'ADMIN',
+    role: Role.ADMIN,
     accessToken: sha256(PLAIN_TOKENS[2]),
   }),
   new User({
@@ -34,7 +35,7 @@ const SEED_USERS: User[] = [
     name: 'Bob Smith',
     email: 'bob@example.com',
     password: 'password3',
-    role: 'USER',
+    role: Role.USER,
     accessToken: sha256(PLAIN_TOKENS[3]),
   }),
 ];

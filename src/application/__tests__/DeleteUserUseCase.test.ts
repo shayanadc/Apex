@@ -1,8 +1,10 @@
 import { describe, it, expect, vi } from 'vitest';
 import { DeleteUserUseCase } from '../usecases/DeleteUserUseCase.js';
-import type { IUserRepository } from '../ports/outbound/IUserRepository.js';
 import { User } from '../../domain/user/User.js';
+import { Role } from '../../domain/user/Role.js';
 import { UserNotFoundError } from '../errors/UserNotFoundError.js';
+import { makeMockUserRepository } from './__helper__/makeMockUserRepository.js';
+import type { IUserRepository } from '../ports/outbound/IUserRepository.js';
 
 describe('DeleteUserUseCase', () => {
   const mockUser = new User({
@@ -10,20 +12,18 @@ describe('DeleteUserUseCase', () => {
     name: 'John Doe',
     email: 'john@example.com',
     password: 'password1',
-    role: 'USER',
+    role: Role.USER,
     accessToken: 'token-1',
   });
 
-  const makeMockRepo = (user: User | null): IUserRepository => ({
-    findAll: vi.fn(),
-    findById: vi.fn().mockResolvedValue(user),
-    findByEmail: vi.fn(),
-    update: vi.fn(),
-    delete: vi.fn().mockResolvedValue(undefined),
-  });
+  const makeRepo = (user: User | null): IUserRepository =>
+    makeMockUserRepository({
+      findById: vi.fn().mockResolvedValue(user),
+      delete: vi.fn().mockResolvedValue(undefined),
+    });
 
   it('resolves void when the user exists', async () => {
-    const repo = makeMockRepo(mockUser);
+    const repo = makeRepo(mockUser);
     const useCase = new DeleteUserUseCase(repo);
 
     await expect(useCase.execute(1)).resolves.toBeUndefined();
@@ -32,7 +32,7 @@ describe('DeleteUserUseCase', () => {
   });
 
   it('throws UserNotFoundError with code USER_NOT_FOUND when user does not exist', async () => {
-    const repo = makeMockRepo(null);
+    const repo = makeRepo(null);
     const useCase = new DeleteUserUseCase(repo);
 
     await expect(useCase.execute(99)).rejects.toThrow(UserNotFoundError);
