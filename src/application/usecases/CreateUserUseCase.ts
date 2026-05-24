@@ -19,12 +19,18 @@ export class CreateUserUseCase {
 
     const { name, email, password, role: rawRole } = command.newUser;
 
+    if (!name?.trim()) {
+      throw new InvalidUserError('User name is required');
+    }
+    if (!isValidEmail(email)) {
+      throw new InvalidUserError('User email is invalid');
+    }
     if (!password?.trim()) {
       throw new InvalidUserError('Password is required');
     }
     const role = Role.from(rawRole);
 
-    const normalizedEmail = email?.trim().toLowerCase() ?? '';
+    const normalizedEmail = email.trim().toLowerCase();
     const emailOwner = await this.userRepository.findByEmail(normalizedEmail);
     if (emailOwner !== null) {
       throw new EmailAlreadyInUseError(email);
@@ -49,4 +55,8 @@ export class CreateUserUseCase {
       access_token: token.plain,
     };
   }
+}
+
+function isValidEmail(raw: string | undefined): boolean {
+  return /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(raw?.trim().toLowerCase() ?? '');
 }

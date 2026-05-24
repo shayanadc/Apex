@@ -25,7 +25,7 @@ export class InMemoryUserRepository implements IUserRepository {
   }
 
   save(draft: NewUserData): Promise<User> {
-    const user = User.create({ id: this.users.length + 1, ...draft });
+    const user = User.reconstitute({ id: this.users.length + 1, ...draft });
     this.users.push(user);
     return Promise.resolve(user);
   }
