@@ -32,6 +32,10 @@ describe('User — assertCanView', () => {
     expect(() => admin.assertCanView(userA)).not.toThrow();
     expect(() => admin.assertCanView(userB)).not.toThrow();
   });
+
+  it('ADMIN can view themselves', () => {
+    expect(() => admin.assertCanView(admin)).not.toThrow();
+  });
 });
 
 describe('User — assertCanUpdate', () => {
@@ -47,11 +51,19 @@ describe('User — assertCanUpdate', () => {
     expect(() => admin.assertCanUpdate(userA)).not.toThrow();
     expect(() => admin.assertCanUpdate(userB)).not.toThrow();
   });
+
+  it('ADMIN can update themselves', () => {
+    expect(() => admin.assertCanUpdate(admin)).not.toThrow();
+  });
 });
 
 describe('User — assertCanUpdateRole', () => {
   it("ADMIN can update a user's role", () => {
     expect(() => admin.assertCanUpdateRole(userA)).not.toThrow();
+  });
+
+  it('ADMIN can update their own role', () => {
+    expect(() => admin.assertCanUpdateRole(admin)).not.toThrow();
   });
 
   it('USER cannot update any role', () => {
