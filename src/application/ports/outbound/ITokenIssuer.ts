@@ -12,6 +12,6 @@ export interface ITokenIssuer {
 }
 
 export type IssuedToken = {
-  plain: string;
-  hash: string;
+  readonly plain: string;
+  readonly hash: string;
 };

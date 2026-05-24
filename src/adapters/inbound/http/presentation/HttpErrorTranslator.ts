@@ -15,9 +15,9 @@ import { UnauthorizedError } from '../errors/UnauthorizedError.js';
 export type HttpStatus = 401 | 403 | 404 | 422 | 500;
 
 export type TranslatedError = {
-  status: HttpStatus;
-  detail: string;
-  originalError: unknown;
+  readonly status: HttpStatus;
+  readonly detail: string;
+  readonly originalError: unknown;
 };
 
 export const STATUS_TITLES = {
