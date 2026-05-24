@@ -4,36 +4,45 @@ import type { UpdateUserCommand } from '../ports/inbound/UpdateUserCommand.js';
 import { UserNotFoundError } from '../errors/UserNotFoundError.js';
 import { EmptyPatchError } from '../errors/EmptyPatchError.js';
 import { EmailAlreadyInUseError } from '../../domain/user/errors/EmailAlreadyInUseError.js';
+import { Role } from '../../domain/user/Role.js';
 
 export class UpdateUserUseCase {
   constructor(private readonly userRepository: IUserRepository) {}
 
-  async execute(id: number, command: UpdateUserCommand): Promise<UserView> {
-    if (Object.keys(command).length === 0) {
+  async execute(command: UpdateUserCommand): Promise<UserView> {
+    const {
+      actor,
+      targetUser: { id: targetId, name, email, role },
+    } = command;
+
+    if (name === undefined && email === undefined && role === undefined) {
       throw new EmptyPatchError();
     }
 
-    const user = await this.userRepository.findById(id);
+    const existingUser = await this.userRepository.findById(targetId);
 
-    if (user === null) {
-      throw new UserNotFoundError(id);
+    if (existingUser === null) {
+      throw new UserNotFoundError(targetId);
     }
 
-    if (command.email !== undefined) {
-      const existing = await this.userRepository.findByEmail(command.email);
-      if (existing !== null && existing.getId() !== id) {
-        throw new EmailAlreadyInUseError(command.email);
+    actor.assertCanUpdate(existingUser);
+
+    if (role !== undefined) {
+      actor.assertCanUpdateRole(existingUser);
+    }
+
+    if (email !== undefined) {
+      const existing = await this.userRepository.findByEmail(email);
+      if (existing !== null && existing.getId() !== targetId) {
+        throw new EmailAlreadyInUseError(email);
       }
     }
 
-    if (command.name !== undefined) user.rename(command.name);
-    if (command.email !== undefined) user.changeEmail(command.email);
-    if (command.role !== undefined && command.role !== user.getRole().getValue()) {
-      if (command.role === 'ADMIN') user.promoteToAdmin();
-      else user.demoteToUser();
-    }
+    if (name !== undefined) existingUser.rename(name);
+    if (email !== undefined) existingUser.changeEmail(email);
+    if (role !== undefined) existingUser.changeRole(Role.from(role));
 
-    const stored = await this.userRepository.update(user);
+    const stored = await this.userRepository.update(existingUser);
 
     return {
       id: stored.getId(),

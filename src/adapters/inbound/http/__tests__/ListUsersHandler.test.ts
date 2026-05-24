@@ -11,9 +11,9 @@ beforeEach(() => seeder.seed());
 afterAll(() => seeder.tearDown());
 
 describe('ListUsersHandler', () => {
-  it('returns 200 with JSON:API content type and user data without sensitive fields', async () => {
+  it('ADMIN returns 200 with JSON:API content type and user data without sensitive fields', async () => {
     const res = await app.request('/api/users', {
-      headers: { Authorization: `Bearer ${PLAIN_TOKENS[1]}` },
+      headers: { Authorization: `Bearer ${PLAIN_TOKENS[2]}` }, // user 2 is ADMIN
     });
     expect(res.status).toBe(200);
     expect(res.headers.get('Content-Type')).toContain('application/vnd.api+json');
@@ -36,5 +36,16 @@ describe('ListUsersHandler', () => {
     expect(first).not.toHaveProperty('accessToken');
     expect(first).not.toHaveProperty('password');
     expect(first).not.toHaveProperty('type');
+  });
+
+  it('USER returns 403 Forbidden', async () => {
+    const res = await app.request('/api/users', {
+      headers: { Authorization: `Bearer ${PLAIN_TOKENS[1]}` }, // user 1 is USER
+    });
+    expect(res.status).toBe(403);
+    const body = await res.json();
+    expect(body).toMatchObject({
+      errors: [{ status: '403', title: 'Forbidden' }],
+    });
   });
 });

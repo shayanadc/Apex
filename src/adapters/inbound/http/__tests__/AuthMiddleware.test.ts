@@ -13,7 +13,7 @@ afterAll(() => seeder.tearDown());
 describe('AuthMiddleware', () => {
   it('allows a valid token through and returns 200 on GET /api/users', async () => {
     const res = await app.request('/api/users', {
-      headers: { Authorization: `Bearer ${PLAIN_TOKENS[1]}` },
+      headers: { Authorization: `Bearer ${PLAIN_TOKENS[2]}` }, // user 2 is ADMIN
     });
     expect(res.status).toBe(200);
     expect(res.headers.get('Content-Type')).toContain('application/vnd.api+json');

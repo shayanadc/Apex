@@ -5,92 +5,150 @@ import { Role } from '../../domain/user/Role.js';
 import { UserNotFoundError } from '../errors/UserNotFoundError.js';
 import { EmptyPatchError } from '../errors/EmptyPatchError.js';
 import { EmailAlreadyInUseError } from '../../domain/user/errors/EmailAlreadyInUseError.js';
+import { ForbiddenError } from '../../domain/user/errors/ForbiddenError.js';
 import { makeMockUserRepository } from './__helper__/makeMockUserRepository.js';
 import type { IUserRepository } from '../ports/outbound/IUserRepository.js';
 
-describe('UpdateUserUseCase', () => {
-  const mockUser = new User({
-    id: 1,
-    name: 'John Doe',
-    email: 'john@example.com',
-    password: 'password1',
-    role: Role.USER,
-    accessToken: 'token-1',
+const userActor = new User({
+  id: 1,
+  name: 'User One',
+  email: 'user@example.com',
+  password: 'hash1',
+  role: Role.USER,
+  accessToken: 'tok1',
+});
+const adminActor = new User({
+  id: 2,
+  name: 'Admin Two',
+  email: 'admin@example.com',
+  password: 'hash2',
+  role: Role.ADMIN,
+  accessToken: 'tok2',
+});
+const targetUser = new User({
+  id: 3,
+  name: 'Target Three',
+  email: 'target@example.com',
+  password: 'hash3',
+  role: Role.USER,
+  accessToken: 'tok3',
+});
+
+const makeRepo = (target: User | null, emailConflict: User | null = null): IUserRepository =>
+  makeMockUserRepository({
+    findById: vi.fn().mockResolvedValue(target),
+    findByEmail: vi.fn().mockResolvedValue(emailConflict),
+    update: vi.fn().mockImplementation((u: User) => Promise.resolve(u)),
   });
 
-  const makeRepo = (user: User | null): IUserRepository =>
-    makeMockUserRepository({
-      findById: vi.fn().mockResolvedValue(user),
-      findByEmail: vi.fn().mockResolvedValue(null),
-      update: vi.fn().mockImplementation((u: User) => Promise.resolve(u)),
+describe('UpdateUserUseCase', () => {
+  it('EmptyPatchError when no patch fields provided — no repo calls', async () => {
+    const repo = makeRepo(userActor);
+    await expect(
+      new UpdateUserUseCase(repo).execute({ actor: userActor, targetUser: { id: 1 } }),
+    ).rejects.toThrow(EmptyPatchError);
+    expect(repo.findById).not.toHaveBeenCalled();
+  });
+
+  it('USER updates own non-role fields → success, returns UserView', async () => {
+    const repo = makeRepo(userActor);
+    const result = await new UpdateUserUseCase(repo).execute({
+      actor: userActor,
+      targetUser: { id: 1, name: 'Updated Name' },
     });
-
-  it('returns updated UserView on success', async () => {
-    const repo = makeRepo(mockUser);
-    const useCase = new UpdateUserUseCase(repo);
-
-    const result = await useCase.execute(1, { name: 'Updated Name' });
 
     expect(result).toEqual({
       id: 1,
       name: 'Updated Name',
-      email: 'john@example.com',
+      email: 'user@example.com',
       role: 'USER',
     });
     expect(result).not.toHaveProperty('password');
     expect(result).not.toHaveProperty('accessToken');
   });
 
-  it('throws EmptyPatchError when patch has zero keys', async () => {
-    const repo = makeRepo(mockUser);
-    const useCase = new UpdateUserUseCase(repo);
-
-    await expect(useCase.execute(1, {})).rejects.toThrow(EmptyPatchError);
-    expect(repo.findById).not.toHaveBeenCalled();
+  it('USER updates own role → ForbiddenError (role escalation blocked)', async () => {
+    const repo = makeRepo(userActor);
+    await expect(
+      new UpdateUserUseCase(repo).execute({
+        actor: userActor,
+        targetUser: { id: 1, role: 'ADMIN' },
+      }),
+    ).rejects.toThrow(ForbiddenError);
     expect(repo.update).not.toHaveBeenCalled();
   });
 
-  it('throws UserNotFoundError when user does not exist', async () => {
+  it('USER updates another user → ForbiddenError', async () => {
+    const repo = makeRepo(targetUser);
+    await expect(
+      new UpdateUserUseCase(repo).execute({
+        actor: userActor,
+        targetUser: { id: 3, name: 'Hacked' },
+      }),
+    ).rejects.toThrow(ForbiddenError);
+    expect(repo.update).not.toHaveBeenCalled();
+  });
+
+  it('ADMIN updates any user name → success', async () => {
+    const repo = makeRepo(targetUser);
+    const result = await new UpdateUserUseCase(repo).execute({
+      actor: adminActor,
+      targetUser: { id: 3, name: 'Admin Changed' },
+    });
+
+    expect(result.name).toBe('Admin Changed');
+    expect(repo.update).toHaveBeenCalled();
+  });
+
+  it('ADMIN updates any user role → success', async () => {
+    const repo = makeRepo(targetUser);
+    const result = await new UpdateUserUseCase(repo).execute({
+      actor: adminActor,
+      targetUser: { id: 3, role: 'ADMIN' },
+    });
+
+    expect(result.role).toBe('ADMIN');
+    expect(repo.update).toHaveBeenCalled();
+  });
+
+  it('ADMIN updates non-existent user → UserNotFoundError', async () => {
     const repo = makeRepo(null);
-    const useCase = new UpdateUserUseCase(repo);
-
-    await expect(useCase.execute(99, { name: 'Test' })).rejects.toThrow(UserNotFoundError);
-    await expect(useCase.execute(99, { name: 'Test' })).rejects.toMatchObject({
-      code: 'USER_NOT_FOUND',
-      id: 99,
-    });
-  });
-
-  it('throws EmailAlreadyInUseError when the email belongs to another user', async () => {
-    const repo = makeRepo(mockUser);
-    const otherUser = new User({
-      id: 2,
-      name: 'Jane Doe',
-      email: 'taken@example.com',
-      password: 'password2',
-      role: Role.USER,
-      accessToken: 'token-2',
-    });
-    vi.mocked(repo.findByEmail).mockResolvedValue(otherUser);
-    const useCase = new UpdateUserUseCase(repo);
-
-    await expect(useCase.execute(1, { email: 'taken@example.com' })).rejects.toThrow(
-      EmailAlreadyInUseError,
-    );
-    await expect(useCase.execute(1, { email: 'taken@example.com' })).rejects.toMatchObject({
-      code: 'EMAIL_ALREADY_IN_USE',
-    });
+    await expect(
+      new UpdateUserUseCase(repo).execute({
+        actor: adminActor,
+        targetUser: { id: 99, name: 'Test' },
+      }),
+    ).rejects.toThrow(UserNotFoundError);
     expect(repo.update).not.toHaveBeenCalled();
   });
 
-  it('allows updating to the user own current email', async () => {
-    const repo = makeRepo(mockUser);
-    vi.mocked(repo.findByEmail).mockResolvedValue(mockUser);
-    const useCase = new UpdateUserUseCase(repo);
+  it('duplicate email → EmailAlreadyInUseError, update not called', async () => {
+    const conflictUser = new User({
+      id: 99,
+      name: 'Conflict',
+      email: 'taken@example.com',
+      password: 'hash',
+      role: Role.USER,
+      accessToken: 'tok',
+    });
+    const repo = makeRepo(targetUser, conflictUser);
+    await expect(
+      new UpdateUserUseCase(repo).execute({
+        actor: adminActor,
+        targetUser: { id: 3, email: 'taken@example.com' },
+      }),
+    ).rejects.toThrow(EmailAlreadyInUseError);
+    expect(repo.update).not.toHaveBeenCalled();
+  });
 
-    const result = await useCase.execute(1, { email: 'john@example.com' });
+  it('updating to own current email is allowed', async () => {
+    const repo = makeRepo(userActor, userActor);
+    const result = await new UpdateUserUseCase(repo).execute({
+      actor: userActor,
+      targetUser: { id: 1, email: 'user@example.com' },
+    });
 
-    expect(result.email).toBe('john@example.com');
+    expect(result.email).toBe('user@example.com');
     expect(repo.update).toHaveBeenCalled();
   });
 });

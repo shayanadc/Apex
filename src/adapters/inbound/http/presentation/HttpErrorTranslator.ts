@@ -3,6 +3,8 @@ import type { DomainError } from '../../../../domain/errors/DomainError.js';
 import { UserNotFoundError } from '../../../../application/errors/UserNotFoundError.js';
 import { EmptyPatchError } from '../../../../application/errors/EmptyPatchError.js';
 import { EmailAlreadyInUseError } from '../../../../domain/user/errors/EmailAlreadyInUseError.js';
+import { ForbiddenError } from '../../../../domain/user/errors/ForbiddenError.js';
+import { CannotDeleteSelfError } from '../../../../domain/user/errors/CannotDeleteSelfError.js';
 import { InvalidUserError } from '../../../../domain/user/errors/InvalidUserError.js';
 import { RoleTransitionError } from '../../../../domain/user/errors/RoleTransitionError.js';
 import type { HttpError } from '../errors/HttpError.js';
@@ -22,6 +24,8 @@ export class HttpErrorTranslator implements ErrorTranslator {
   private static readonly STATUS_RULES: ReadonlyArray<readonly [KnownErrorClass, MappableStatus]> =
     [
       [UnauthorizedError, 401],
+      [ForbiddenError, 403],
+      [CannotDeleteSelfError, 403],
       [UserNotFoundError, 404],
       [EmailAlreadyInUseError, 422],
       [EmptyPatchError, 422],

@@ -13,10 +13,11 @@ export type TranslatedError = {
   originalError: unknown;
 };
 
-export type HttpStatus = 401 | 404 | 422 | 500;
+export type HttpStatus = 401 | 403 | 404 | 422 | 500;
 
 export const STATUS_TITLES = {
   401: 'Unauthorized',
+  403: 'Forbidden',
   404: 'Not Found',
   422: 'Unprocessable Entity',
   500: 'Internal Server Error',

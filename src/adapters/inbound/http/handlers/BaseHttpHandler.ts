@@ -1,7 +1,10 @@
 import type { Context } from 'hono';
+import type { AuthVariables } from '../middleware/AuthMiddleware.js';
 import { RequestValidationError } from '../errors/RequestValidationError.js';
 import { JsonApiResponder } from '../presentation/JsonApiResponder.js';
 import { HttpErrorBoundary } from '../presentation/HttpErrorBoundary.js';
+
+export type AuthContext = Context<{ Variables: AuthVariables }>;
 
 /**
  * Orchestrates the one path every handler follows:
@@ -16,7 +19,7 @@ export abstract class BaseHttpHandler {
     private readonly boundary: HttpErrorBoundary = new HttpErrorBoundary(),
   ) {}
 
-  async handle(c: Context): Promise<Response> {
+  async handle(c: AuthContext): Promise<Response> {
     try {
       return await this.execute(c);
     } catch (error: unknown) {
@@ -24,7 +27,7 @@ export abstract class BaseHttpHandler {
     }
   }
 
-  protected abstract execute(c: Context): Promise<Response>;
+  protected abstract execute(c: AuthContext): Promise<Response>;
 
   protected parseId(raw: string | undefined): number {
     const id = parseInt(raw ?? '', 10);

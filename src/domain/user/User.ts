@@ -74,6 +74,12 @@ export class User {
     this.email = normalized;
   }
 
+  changeRole(newRole: Role): void {
+    if (newRole.equals(this.role)) return;
+    if (newRole.isAdmin()) this.promoteToAdmin();
+    else this.demoteToUser();
+  }
+
   promoteToAdmin(): void {
     if (this.role.isAdmin()) throw new RoleTransitionError('User is already an admin');
     this.role = Role.ADMIN;

@@ -3,40 +3,80 @@ import { DeleteUserUseCase } from '../usecases/DeleteUserUseCase.js';
 import { User } from '../../domain/user/User.js';
 import { Role } from '../../domain/user/Role.js';
 import { UserNotFoundError } from '../errors/UserNotFoundError.js';
+import { ForbiddenError } from '../../domain/user/errors/ForbiddenError.js';
+import { CannotDeleteSelfError } from '../../domain/user/errors/CannotDeleteSelfError.js';
 import { makeMockUserRepository } from './__helper__/makeMockUserRepository.js';
 import type { IUserRepository } from '../ports/outbound/IUserRepository.js';
 
+const adminActor = new User({
+  id: 1,
+  name: 'Admin One',
+  email: 'admin@example.com',
+  password: 'hash1',
+  role: Role.ADMIN,
+  accessToken: 'tok1',
+});
+const userActor = new User({
+  id: 2,
+  name: 'User Two',
+  email: 'user@example.com',
+  password: 'hash2',
+  role: Role.USER,
+  accessToken: 'tok2',
+});
+const otherUser = new User({
+  id: 3,
+  name: 'Other Three',
+  email: 'other@example.com',
+  password: 'hash3',
+  role: Role.USER,
+  accessToken: 'tok3',
+});
+
+const makeRepo = (target: User | null): IUserRepository =>
+  makeMockUserRepository({
+    findById: vi.fn().mockResolvedValue(target),
+    delete: vi.fn().mockResolvedValue(undefined),
+  });
+
 describe('DeleteUserUseCase', () => {
-  const mockUser = new User({
-    id: 1,
-    name: 'John Doe',
-    email: 'john@example.com',
-    password: 'password1',
-    role: Role.USER,
-    accessToken: 'token-1',
+  it('ADMIN deletes another user → resolves void, delete called', async () => {
+    const repo = makeRepo(otherUser);
+    await expect(
+      new DeleteUserUseCase(repo).execute({ actor: adminActor, targetId: 3 }),
+    ).resolves.toBeUndefined();
+    expect(repo.delete).toHaveBeenCalledWith(3);
   });
 
-  const makeRepo = (user: User | null): IUserRepository =>
-    makeMockUserRepository({
-      findById: vi.fn().mockResolvedValue(user),
-      delete: vi.fn().mockResolvedValue(undefined),
-    });
-
-  it('resolves void when the user exists', async () => {
-    const repo = makeRepo(mockUser);
-    const useCase = new DeleteUserUseCase(repo);
-
-    await expect(useCase.execute(1)).resolves.toBeUndefined();
-    expect(repo.findById).toHaveBeenCalledWith(1);
-    expect(repo.delete).toHaveBeenCalledWith(1);
+  it('ADMIN deletes themselves → CannotDeleteSelfError', async () => {
+    const repo = makeRepo(adminActor);
+    await expect(
+      new DeleteUserUseCase(repo).execute({ actor: adminActor, targetId: 1 }),
+    ).rejects.toThrow(CannotDeleteSelfError);
+    expect(repo.delete).not.toHaveBeenCalled();
   });
 
-  it('throws UserNotFoundError with code USER_NOT_FOUND when user does not exist', async () => {
+  it('USER deletes themselves → CannotDeleteSelfError', async () => {
+    const repo = makeRepo(userActor);
+    await expect(
+      new DeleteUserUseCase(repo).execute({ actor: userActor, targetId: 2 }),
+    ).rejects.toThrow(CannotDeleteSelfError);
+    expect(repo.delete).not.toHaveBeenCalled();
+  });
+
+  it('USER deletes another user → ForbiddenError', async () => {
+    const repo = makeRepo(otherUser);
+    await expect(
+      new DeleteUserUseCase(repo).execute({ actor: userActor, targetId: 3 }),
+    ).rejects.toThrow(ForbiddenError);
+    expect(repo.delete).not.toHaveBeenCalled();
+  });
+
+  it('ADMIN deletes non-existent user → UserNotFoundError', async () => {
     const repo = makeRepo(null);
-    const useCase = new DeleteUserUseCase(repo);
-
-    await expect(useCase.execute(99)).rejects.toThrow(UserNotFoundError);
-    await expect(useCase.execute(99)).rejects.toMatchObject({ code: 'USER_NOT_FOUND', id: 99 });
+    await expect(
+      new DeleteUserUseCase(repo).execute({ actor: adminActor, targetId: 99 }),
+    ).rejects.toThrow(UserNotFoundError);
     expect(repo.delete).not.toHaveBeenCalled();
   });
 });

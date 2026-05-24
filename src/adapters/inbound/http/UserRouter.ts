@@ -1,5 +1,4 @@
 import { Hono } from 'hono';
-import type { Context } from 'hono';
 import type { ListUsersHandler } from './handlers/ListUsersHandler.js';
 import type { GetUserHandler } from './handlers/GetUserHandler.js';
 import type { UpdateUserHandler } from './handlers/UpdateUserHandler.js';
@@ -22,10 +21,10 @@ export class UserRouter {
   }
 
   private registerRoutes(): void {
-    this.router.get('/users', (c) => this.listUsersHandler.handle(c as Context));
-    this.router.get('/users/:id', (c) => this.getUserHandler.handle(c as Context));
-    this.router.patch('/users/:id', (c) => this.updateUserHandler.handle(c as Context));
-    this.router.delete('/users/:id', (c) => this.deleteUserHandler.handle(c as Context));
+    this.router.get('/users', (c) => this.listUsersHandler.handle(c));
+    this.router.get('/users/:id', (c) => this.getUserHandler.handle(c));
+    this.router.patch('/users/:id', (c) => this.updateUserHandler.handle(c));
+    this.router.delete('/users/:id', (c) => this.deleteUserHandler.handle(c));
   }
 
   get instance(): Hono<AppEnv> {
