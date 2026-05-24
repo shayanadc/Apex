@@ -7,7 +7,7 @@ function sha256(plain: string): string {
   return createHash('sha256').update(plain).digest('hex');
 }
 
-export const PLAIN_TOKENS: Record<number, string> = {
+export const PLAIN_TOKENS: { 1: string; 2: string; 3: string } = {
   1: 'token-1',
   2: 'token-2',
   3: 'token-3',

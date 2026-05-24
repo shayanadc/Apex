@@ -39,7 +39,7 @@ export class MySqlUserRepository implements IUserRepository {
       'SELECT id, name, email, password, access_token, role FROM users WHERE id = ?',
       [id],
     );
-    return rows.length > 0 ? rowToUser(rows[0]) : null;
+    return rows.length > 0 ? rowToUser(rows[0]!) : null;
   }
 
   async findByEmail(email: string): Promise<User | null> {
@@ -47,7 +47,7 @@ export class MySqlUserRepository implements IUserRepository {
       'SELECT id, name, email, password, access_token, role FROM users WHERE email = ?',
       [email],
     );
-    return rows.length > 0 ? rowToUser(rows[0]) : null;
+    return rows.length > 0 ? rowToUser(rows[0]!) : null;
   }
 
   async findByHashedToken(hash: string): Promise<User | null> {
@@ -55,7 +55,7 @@ export class MySqlUserRepository implements IUserRepository {
       'SELECT id, name, email, password, access_token, role FROM users WHERE access_token = ?',
       [hash],
     );
-    return rows.length > 0 ? rowToUser(rows[0]) : null;
+    return rows.length > 0 ? rowToUser(rows[0]!) : null;
   }
 
   async save(draft: NewUserData): Promise<User> {

@@ -90,7 +90,7 @@ describe('CreateUserUseCase', () => {
         accessToken: sha256('plain-xyz'),
       }),
     );
-    const draft = save.mock.calls[0][0] as NewUserData;
+    const draft = save.mock.calls[0]![0]! as NewUserData;
     expect(draft.password).not.toBe('plain-password');
     expect(draft.accessToken).not.toBe('plain-xyz');
   });
