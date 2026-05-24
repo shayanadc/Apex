@@ -1,8 +1,8 @@
 import type { User, UserState, UserId } from '../../../domain/user/User.js';
-import type { Role } from '../../../domain/user/Role.js';
+import type { RoleValue } from '../../../domain/user/Role.js';
 
 type UpdatableFields = Partial<Readonly<Pick<UserState, 'name' | 'email'>>> & {
-  readonly role?: ReturnType<Role['getValue']>;
+  readonly role?: RoleValue;
 };
 
 export type UpdateUserCommand = {

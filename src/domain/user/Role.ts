@@ -1,5 +1,7 @@
 import { InvalidRoleError } from './errors/InvalidRoleError.js';
 
+export type RoleValue = 'USER' | 'ADMIN';
+
 export class Role {
   static readonly USER = new Role('USER');
   static readonly ADMIN = new Role('ADMIN');
@@ -9,7 +11,7 @@ export class Role {
     ['ADMIN', Role.ADMIN],
   ]);
 
-  private constructor(private readonly value: 'USER' | 'ADMIN') {}
+  private constructor(private readonly value: RoleValue) {}
 
   static from(value: string): Role {
     const r = Role.values.get(value);
@@ -25,7 +27,7 @@ export class Role {
     return this.value === other.value;
   }
 
-  getValue(): 'USER' | 'ADMIN' {
+  getValue(): RoleValue {
     return this.value;
   }
 }
