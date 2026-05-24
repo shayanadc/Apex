@@ -31,7 +31,9 @@ BeforeAll(async () => {
     multipleStatements: false,
   });
 
-  const container = new Container();
+  const container = new Container({
+    userRepository: new MySqlUserRepository(sharedPool),
+  });
   const server = new Server(container);
   const port = Number(process.env.PORT) || 3099;
 
