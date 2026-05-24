@@ -11,7 +11,22 @@ import { RoleTransitionError } from '../../../../domain/user/errors/RoleTransiti
 import type { HttpError } from '../errors/HttpError.js';
 import { RequestValidationError } from '../errors/RequestValidationError.js';
 import { UnauthorizedError } from '../errors/UnauthorizedError.js';
-import type { ErrorTranslator, TranslatedError, HttpStatus } from './ErrorTranslator.js';
+
+export type HttpStatus = 401 | 403 | 404 | 422 | 500;
+
+export type TranslatedError = {
+  status: HttpStatus;
+  detail: string;
+  originalError: unknown;
+};
+
+export const STATUS_TITLES = {
+  401: 'Unauthorized',
+  403: 'Forbidden',
+  404: 'Not Found',
+  422: 'Unprocessable Entity',
+  500: 'Internal Server Error',
+} as const satisfies Record<HttpStatus, string>;
 
 type MappableStatus = Exclude<HttpStatus, 500>;
 type KnownErrorClass = new (...args: never[]) => DomainError | AppError | HttpError;
@@ -21,7 +36,7 @@ type KnownErrorClass = new (...args: never[]) => DomainError | AppError | HttpEr
  * status + detail only — the response envelope is the responder's job.
  * Unmapped errors fall through to 500 so an unknown throw never leaks.
  */
-export class HttpErrorTranslator implements ErrorTranslator {
+export class HttpErrorTranslator {
   private static readonly STATUS_RULES: ReadonlyArray<readonly [KnownErrorClass, MappableStatus]> =
     [
       [UnauthorizedError, 401],

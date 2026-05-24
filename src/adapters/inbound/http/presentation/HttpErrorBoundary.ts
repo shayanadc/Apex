@@ -1,5 +1,4 @@
 import type { Context } from 'hono';
-import type { ErrorTranslator } from './ErrorTranslator.js';
 import { HttpErrorTranslator } from './HttpErrorTranslator.js';
 import { JsonApiResponder } from './JsonApiResponder.js';
 
@@ -9,7 +8,7 @@ import { JsonApiResponder } from './JsonApiResponder.js';
  */
 export class HttpErrorBoundary {
   constructor(
-    private readonly translator: ErrorTranslator = new HttpErrorTranslator(),
+    private readonly translator: HttpErrorTranslator = new HttpErrorTranslator(),
     private readonly responder: JsonApiResponder = new JsonApiResponder(),
   ) {}
 

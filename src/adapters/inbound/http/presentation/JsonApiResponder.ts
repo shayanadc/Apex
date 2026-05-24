@@ -1,7 +1,7 @@
 import type { Context } from 'hono';
 import type { ContentfulStatusCode } from 'hono/utils/http-status';
-import { STATUS_TITLES } from './ErrorTranslator.js';
-import type { HttpStatus } from './ErrorTranslator.js';
+import { STATUS_TITLES } from './HttpErrorTranslator.js';
+import type { HttpStatus } from './HttpErrorTranslator.js';
 
 export const JSON_API_CONTENT_TYPE = 'application/vnd.api+json';
 
