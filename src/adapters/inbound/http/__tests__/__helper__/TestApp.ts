@@ -1,8 +1,6 @@
 import type { IUserRepository } from '../../../../../application/ports/outbound/IUserRepository.js';
-import { createContainer } from '../../../../../composition/container.js';
-import { AuthMiddleware } from '../../middleware/AuthMiddleware.js';
-import { HttpErrorBoundary } from '../../presentation/HttpErrorBoundary.js';
-import { Router } from '../../Router.js';
+import { Container } from '../../../../../composition/Container.js';
+import { Server } from '../../Server.js';
 
 /**
  * Builds the full Hono application (middleware + routes) wired to the
@@ -10,14 +8,9 @@ import { Router } from '../../Router.js';
  * the repository independently.
  */
 export class TestApp {
-  readonly app: Router['honoApp'];
+  readonly app: Server['app'];
 
   constructor(repo: IUserRepository) {
-    const errorBoundary = new HttpErrorBoundary();
-
-    this.app = new Router(createContainer(repo))
-      .onError((err, c) => errorBoundary.handle(c, err))
-      .use('/api/*', (c, next) => new AuthMiddleware(repo).handle(c, next))
-      .build().honoApp;
+    this.app = new Server(new Container({ userRepository: repo })).app;
   }
 }
