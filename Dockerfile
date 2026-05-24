@@ -2,7 +2,7 @@
 FROM node:24-alpine AS builder
 WORKDIR /app
 COPY package*.json ./
-RUN npm ci
+RUN HUSKY=0 npm ci
 COPY . .
 RUN npm run build
 
@@ -10,7 +10,7 @@ RUN npm run build
 FROM node:24-alpine AS production
 WORKDIR /app
 COPY package*.json ./
-RUN npm ci --omit=dev
+RUN HUSKY=0 npm ci --omit=dev --ignore-scripts
 COPY --from=builder /app/dist ./dist
 ENV PORT=3000
 EXPOSE 3000

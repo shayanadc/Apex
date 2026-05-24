@@ -140,6 +140,17 @@ export class User {
     if (this.id === target.id) throw new CannotDeleteSelfError();
     if (!this.role.isAdmin()) throw new ForbiddenError();
   }
+
+  toState(): UserState {
+    return {
+      id: this.id,
+      name: this.name,
+      email: this.email,
+      password: this.password,
+      accessToken: this.accessToken,
+      role: this.role,
+    };
+  }
 }
 
 function isValidEmail(raw: string): boolean {

@@ -14,7 +14,7 @@ A production-grade RESTful User Management API built with TypeScript, Hono, and 
 - **Delete user by ID endpoint** — `DELETE /api/users/:id` removes a user; 204 No Content on success, 404 if not found, 422 if the id is non-numeric
 - **JSON:API-inspired responses** — all endpoints respond with `Content-Type: application/vnd.api+json`; user resources use a flat `{ data: [...] }` shape (no `type`/`attributes` nesting)
 - **Environment variable support** — server port (and future config) is loaded from `.env` via `dotenv`
-- **Docker support** — multi-stage Dockerfile and `docker-compose.yml` for containerised local development and deployment
+- **Docker support** — multi-stage Dockerfile and `docker-compose.yml` for containerised local development and deployment; includes a MySQL 8 service with a named volume for data persistence
 
 ---
 
@@ -36,8 +36,10 @@ src/
 │   ├── inbound/             # Driving adapters — drive the application
 │   │   └── http/            # Hono router and request handlers (+ __tests__/)
 │   └── outbound/            # Driven adapters — driven by the application
-│       └── persistence/     # In-memory and future DB repository implementations
+│       └── persistence/     # InMemoryUserRepository + MySqlUserRepository
 ├── composition/             # Composition root — wires adapters, use cases, and handlers
+├── infrastructure/
+│   └── db/                  # createMysqlPool() — mysql2 pool factory
 └── index.ts                 # Bootstrap entry point
 ```
 
@@ -74,6 +76,30 @@ Edit `.env` to override any defaults for your local environment.
 npm install
 ```
 
+### Database setup (MySQL mode only)
+
+When `DB_ENGINE=mysql`, a MySQL 8 database must be available and the schema must be applied before the app can serve requests.
+
+#### Option A: Docker (recommended)
+
+The `db` container automatically runs `db/schema.sql` on first start (when the data volume is empty), creating the `apex_nevada` database and `users` table. The `app` container waits for MySQL to pass its healthcheck before starting.
+
+```bash
+docker compose up -d
+```
+
+That's all — no manual schema step required.
+
+#### Option B: Local MySQL
+
+If you have a local MySQL 8 instance, run the schema file directly:
+
+```bash
+mysql -u root -p < db/schema.sql
+```
+
+The schema creates the `apex_nevada` database (if absent) and a `users` table. Match the database name to your `DB_NAME` env var if you rename it.
+
 ### Run (development)
 
 ```bash
@@ -107,9 +133,11 @@ From the **repository root**:
 ```bash
 cp .env.example .env
 
-# Build and start
+# Build and start the full stack (app + MySQL)
 docker compose up --build
 ```
+
+This starts two containers: `apexnevada-app` (the API) and `apexnevada-db` (MySQL 8). MySQL data is persisted in a named Docker volume (`mysql_data`) and survives restarts.
 
 The app will be accessible at `http://localhost:3000`. To verify:
 
@@ -123,19 +151,29 @@ Expected response:
 {"meta":{"status":"ok"}}
 ```
 
-To stop:
+To stop (preserves MySQL data):
 
 ```bash
 docker compose down
 ```
 
+To stop **and wipe all MySQL data**:
+
+```bash
+docker compose down -v
+```
+
 ### Test
 
 ```bash
+# Unit tests
 npm test
+
+# End-to-end (Cucumber) tests
+npm run test:cucumber
 ```
 
-Runs the full Vitest suite. The project uses two distinct test tiers:
+Runs the full Vitest suite. The project uses **three** distinct test tiers:
 
 **Application layer — unit tests** (`src/application/__tests__/`)
 Use-case tests inject mock `IUserRepository` implementations via `vi.fn()`. They verify business logic in complete isolation — no HTTP, no framework, no real adapter.
@@ -154,6 +192,58 @@ const { app } = new TestApp(repo);
 beforeEach(() => seeder.seed());
 afterAll(() => seeder.tearDown());
 ```
+
+**E2E — Cucumber scenarios** (`features/`)
+Gherkin scenarios exercise the entire stack — real HTTP TCP requests, real MySQL database, real Hono server. Each scenario starts a server on port `3099` backed by `apex_nevada_test`, seeds users, fires `fetch()` calls, and asserts JSON:API responses.
+
+#### Setup
+
+**Prerequisites:** Docker must be installed and running.
+
+E2E tests read all database config from `.env.test`. A default file is committed to the repository — no manual editing is required to get started:
+
+| Variable | Default value | Purpose |
+|----------|---------------|---------|
+| `DB_ENGINE` | `mysql` | Forces MySQL adapter in the test process |
+| `DB_HOST` | `127.0.0.1` | MySQL host (the mapped Docker port) |
+| `DB_PORT` | `3306` | Host port the test container binds to |
+| `DB_NAME` | `apex_nevada_test` | Isolated test database (never touches production data) |
+| `DB_USER` | `root` | MySQL user |
+| `DB_PASSWORD` | `secret` | MySQL password |
+| `PORT` | `3099` | Port the test Hono server listens on |
+
+The `db-test` service in `docker-compose.yml` is configured to read these same variables (via `--env-file .env.test`) and mounts `db/init-test.sql` into `initdb.d` so the `users` table is created automatically on first start.
+
+#### Running
+
+```bash
+npm run test:cucumber
+```
+
+This single command:
+1. Starts the `db-test` Docker Compose service in detached mode (`--profile test`)
+2. Waits until the MySQL healthcheck passes before proceeding
+3. Runs the full Cucumber suite against the live server and database
+4. Exits with the Cucumber exit code (non-zero on failure)
+
+The container is left running after the suite completes — subsequent runs skip the startup wait and go straight to running tests, making re-runs fast.
+
+#### Tearing down the test database
+
+```bash
+docker compose --profile test down
+```
+
+This stops and removes only the `db-test` container. The production `db` container and `mysql_data` volume are not affected.
+
+#### What the hooks do
+
+- **`BeforeAll`** — opens a connection pool and starts the Hono server on port `3099`
+- **`Before`** — truncates `users` and re-seeds the admin user (Alice) before each scenario
+- **`After`** — truncates `users` after each scenario, ensuring a clean state even on failure
+- **`AfterAll`** — closes the connection pool and shuts down the server
+
+The `Before` hook truncates and re-seeds the `users` table before every scenario; the `After` hook truncates it after, ensuring full isolation even on test failure.
 
 ### Type-check
 
@@ -378,3 +468,9 @@ Removes the user with the given numeric ID. Returns no body on success.
 | Variable | Default | Required | Description |
 |----------|---------|----------|-------------|
 | `PORT` | `3000` | No | Port the HTTP server listens on |
+| `DB_ENGINE` | *(in-memory)* | No | Set to `mysql` to use MySQL persistence; any other value uses in-memory |
+| `DB_HOST` | — | When `DB_ENGINE=mysql` | MySQL host (e.g. `127.0.0.1`) |
+| `DB_PORT` | `3306` | No | MySQL port |
+| `DB_NAME` | — | When `DB_ENGINE=mysql` | MySQL database name (e.g. `apex_nevada`) |
+| `DB_USER` | — | When `DB_ENGINE=mysql` | MySQL username |
+| `DB_PASSWORD` | — | When `DB_ENGINE=mysql` | MySQL password |

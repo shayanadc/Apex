@@ -7,3 +7,37 @@ services:
       - "3000:3000"
     env_file:
       - .env
+    depends_on:
+      - db
+
+  db:
+    image: mysql:8
+    container_name: apexnevada-db
+    command: --innodb-buffer-pool-size=128M --innodb-log-buffer-size=32M
+    environment:
+      MYSQL_ROOT_PASSWORD: ${DB_PASSWORD}
+      MYSQL_DATABASE: ${DB_NAME}
+    volumes:
+      - mysql_data:/var/lib/mysql
+      - ./db/schema.sql:/docker-entrypoint-initdb.d/schema.sql:ro
+
+  db-test:
+    image: mysql:8.4
+    container_name: apexnevada-test-db
+    profiles: [test]
+    environment:
+      MYSQL_ROOT_PASSWORD: ${DB_PASSWORD}
+      MYSQL_DATABASE: ${DB_NAME}
+    ports:
+      - "${DB_PORT}:3306"
+    volumes:
+      - ./db/init-test.sql:/docker-entrypoint-initdb.d/init-test.sql:ro
+    healthcheck:
+      test: ["CMD", "mysqladmin", "ping", "-uroot", "-p${DB_PASSWORD}", "--silent"]
+      interval: 3s
+      timeout: 5s
+      retries: 20
+      start_period: 15s
+
+volumes:
+  mysql_data:
