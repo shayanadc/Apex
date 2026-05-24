@@ -7,18 +7,9 @@ import { HttpErrorBoundary } from '../presentation/HttpErrorBoundary.js';
 
 export type AuthContext = Context<{ Variables: AuthVariables }>;
 
-/**
- * Orchestrates the one path every handler follows:
- *   try execute() ; on throw, delegate to the error boundary.
- *
- * Knows nothing about the JSON:API envelope or status codes — those
- * live in JsonApiResponder and HttpErrorTranslator respectively.
- */
 export abstract class BaseHttpHandler {
-  constructor(
-    protected readonly responder: JsonApiResponder = new JsonApiResponder(),
-    private readonly boundary: HttpErrorBoundary = new HttpErrorBoundary(),
-  ) {}
+  protected readonly responder = new JsonApiResponder();
+  private readonly boundary = new HttpErrorBoundary();
 
   async handle(c: AuthContext): Promise<Response> {
     try {

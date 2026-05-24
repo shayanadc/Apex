@@ -2,10 +2,6 @@ import type { Context } from 'hono';
 import { HttpErrorTranslator } from './HttpErrorTranslator.js';
 import { JsonApiResponder } from './JsonApiResponder.js';
 
-/**
- * Composes the translator and the responder for the one operation they
- * both serve: turning a thrown value into an HTTP error response.
- */
 export class HttpErrorBoundary {
   constructor(
     private readonly translator: HttpErrorTranslator = new HttpErrorTranslator(),

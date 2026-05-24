@@ -31,11 +31,6 @@ export const STATUS_TITLES = {
 type MappableStatus = Exclude<HttpStatus, 500>;
 type KnownErrorClass = new (...args: never[]) => DomainError | AppError | HttpError;
 
-/**
- * The single place that maps an error type to an HTTP status. Returns
- * status + detail only — the response envelope is the responder's job.
- * Unmapped errors fall through to 500 so an unknown throw never leaks.
- */
 export class HttpErrorTranslator {
   private static readonly STATUS_RULES: ReadonlyArray<readonly [KnownErrorClass, MappableStatus]> =
     [
@@ -57,6 +52,6 @@ export class HttpErrorTranslator {
         return { status, detail: (error as Error).message, originalError: error };
       }
     }
-    return { status: 500, detail: 'An unexpected error occurred', originalError: error };
+    return { status: 500, detail: STATUS_TITLES[500], originalError: error };
   }
 }
