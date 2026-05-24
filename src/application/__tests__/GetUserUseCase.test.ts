@@ -2,6 +2,7 @@ import { describe, it, expect, vi } from 'vitest';
 import { GetUserUseCase } from '../usecases/GetUserUseCase.js';
 import { User } from '../../domain/user/User.js';
 import { Role } from '../../domain/user/Role.js';
+import { Email } from '../../domain/user/Email.js';
 import { UserNotFoundError } from '../errors/UserNotFoundError.js';
 import { ForbiddenError } from '../../domain/user/errors/ForbiddenError.js';
 import { makeMockUserRepository } from './__helper__/makeMockUserRepository.js';
@@ -10,7 +11,7 @@ import type { IUserRepository } from '../ports/outbound/IUserRepository.js';
 const userActor = User.create({
   id: 1,
   name: 'User One',
-  email: 'user@example.com',
+  email: Email.create('user@example.com'),
   password: 'hash1',
   role: Role.USER,
   accessToken: 'tok1',
@@ -18,7 +19,7 @@ const userActor = User.create({
 const adminActor = User.create({
   id: 2,
   name: 'Admin Two',
-  email: 'admin@example.com',
+  email: Email.create('admin@example.com'),
   password: 'hash2',
   role: Role.ADMIN,
   accessToken: 'tok2',
@@ -26,7 +27,7 @@ const adminActor = User.create({
 const otherUser = User.create({
   id: 3,
   name: 'Other Three',
-  email: 'other@example.com',
+  email: Email.create('other@example.com'),
   password: 'hash3',
   role: Role.USER,
   accessToken: 'tok3',

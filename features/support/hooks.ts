@@ -11,6 +11,7 @@ import { ScryptPasswordHasher } from '../../src/adapters/outbound/crypto/ScryptP
 import { Sha256TokenIssuer } from '../../src/adapters/outbound/crypto/Sha256TokenIssuer.js';
 import { MySqlUserRepository } from '../../src/adapters/outbound/persistence/MySqlUserRepository.js';
 import { Role } from '../../src/domain/user/Role.js';
+import { Email } from '../../src/domain/user/Email.js';
 import type { AppWorld } from './world.js';
 
 const ADMIN_PLAIN_TOKEN = 'alice-token';
@@ -37,7 +38,9 @@ BeforeAll(async () => {
   const server = new Server(container);
   const port = Number(process.env.PORT) || 3099;
 
-  sharedServer = serve({ fetch: server.app.fetch, port });
+  await new Promise<void>((resolve) => {
+    sharedServer = serve({ fetch: server.app.fetch, port }, () => resolve());
+  });
 });
 
 Before(async function (this: AppWorld) {
@@ -58,7 +61,7 @@ Before(async function (this: AppWorld) {
 
   const alice = await repo.save({
     name: 'Alice',
-    email: 'alice@example.com',
+    email: Email.create('alice@example.com'),
     password: hashedPassword,
     accessToken: tokenIssuer.hash(ADMIN_PLAIN_TOKEN),
     role: Role.ADMIN,

@@ -12,7 +12,7 @@ export class ListUsersUseCase {
     return users.map((user) => ({
       id: user.getId(),
       name: user.getName(),
-      email: user.getEmail(),
+      email: user.getEmail().getValue(),
       role: user.getRole().getValue(),
     }));
   }

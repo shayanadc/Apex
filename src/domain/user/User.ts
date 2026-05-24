@@ -3,13 +3,14 @@ import { RoleTransitionError } from './errors/RoleTransitionError.js';
 import { ForbiddenError } from './errors/ForbiddenError.js';
 import { CannotDeleteSelfError } from './errors/CannotDeleteSelfError.js';
 import { Role } from './Role.js';
+import type { Email } from './Email.js';
 
 export type UserId = number;
 
 export type UserState = {
   id: UserId;
   name: string;
-  email: string;
+  email: Email;
   password: string;
   accessToken: string;
   role: Role;
@@ -20,7 +21,7 @@ export type NewUserData = Omit<UserState, 'id'>;
 export class User {
   private readonly id: UserId;
   private name: string;
-  private email: string;
+  private email: Email;
   private accessToken: string;
   private password: string;
   private role: Role;
@@ -34,10 +35,6 @@ export class User {
     this.role = state.role;
   }
 
-  /**
-   * Births a new aggregate. Enforces every invariant and normalises input
-   * (trim name, lowercase email). Use this when a User is being created.
-   */
   static create(state: UserState): User {
     if (!Number.isInteger(state.id) || state.id <= 0) {
       throw new InvalidUserError('User id must be a positive integer');
@@ -45,16 +42,12 @@ export class User {
     if (!state.name?.trim()) {
       throw new InvalidUserError('User name is required');
     }
-    if (!isValidEmail(state.email)) {
-      throw new InvalidUserError('User email is invalid');
-    }
     if (!state.password?.trim()) {
       throw new InvalidUserError('Password hash is required');
     }
     return new User({
       ...state,
       name: state.name.trim(),
-      email: state.email.trim().toLowerCase(),
     });
   }
 
@@ -68,7 +61,7 @@ export class User {
   getName(): string {
     return this.name;
   }
-  getEmail(): string {
+  getEmail(): Email {
     return this.email;
   }
   getRole(): Role {
@@ -86,11 +79,9 @@ export class User {
     this.name = trimmed;
   }
 
-  changeEmail(email: string): void {
-    const normalized = email?.trim().toLowerCase();
-    if (!normalized || !isValidEmail(normalized)) throw new InvalidUserError('Invalid email');
-    if (normalized === this.email) return;
-    this.email = normalized;
+  changeEmail(email: Email): void {
+    if (email.equals(this.email)) return;
+    this.email = email;
   }
 
   changeRole(newRole: Role): void {
@@ -151,8 +142,4 @@ export class User {
       role: this.role,
     };
   }
-}
-
-function isValidEmail(raw: string): boolean {
-  return /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(raw?.trim().toLowerCase() ?? '');
 }

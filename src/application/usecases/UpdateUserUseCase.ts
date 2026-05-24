@@ -5,6 +5,7 @@ import { UserNotFoundError } from '../errors/UserNotFoundError.js';
 import { EmptyPatchError } from '../errors/EmptyPatchError.js';
 import { EmailAlreadyInUseError } from '../../domain/user/errors/EmailAlreadyInUseError.js';
 import { Role } from '../../domain/user/Role.js';
+import { Email } from '../../domain/user/Email.js';
 
 export class UpdateUserUseCase {
   constructor(private readonly userRepository: IUserRepository) {}
@@ -12,10 +13,10 @@ export class UpdateUserUseCase {
   async execute(command: UpdateUserCommand): Promise<UserView> {
     const {
       actor,
-      targetUser: { id: targetId, name, email, role },
+      targetUser: { id: targetId, name, email: rawEmail, role },
     } = command;
 
-    if (name === undefined && email === undefined && role === undefined) {
+    if (name === undefined && rawEmail === undefined && role === undefined) {
       throw new EmptyPatchError();
     }
 
@@ -32,11 +33,12 @@ export class UpdateUserUseCase {
       actor.assertCanUpdateRole(existingUser);
     }
 
+    const email = rawEmail !== undefined ? Email.create(rawEmail) : undefined;
+
     if (email !== undefined) {
-      const normalizedEmail = email.trim().toLowerCase();
-      const existing = await this.userRepository.findByEmail(normalizedEmail);
+      const existing = await this.userRepository.findByEmail(email);
       if (existing !== null && existing.getId() !== targetId) {
-        throw new EmailAlreadyInUseError(email);
+        throw new EmailAlreadyInUseError(email.getValue());
       }
     }
 
@@ -49,7 +51,7 @@ export class UpdateUserUseCase {
     return {
       id: stored.getId(),
       name: stored.getName(),
-      email: stored.getEmail(),
+      email: stored.getEmail().getValue(),
       role: stored.getRole().getValue(),
     };
   }

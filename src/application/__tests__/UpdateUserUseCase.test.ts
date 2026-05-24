@@ -2,6 +2,7 @@ import { describe, it, expect, vi } from 'vitest';
 import { UpdateUserUseCase } from '../usecases/UpdateUserUseCase.js';
 import { User } from '../../domain/user/User.js';
 import { Role } from '../../domain/user/Role.js';
+import { Email } from '../../domain/user/Email.js';
 import { UserNotFoundError } from '../errors/UserNotFoundError.js';
 import { EmptyPatchError } from '../errors/EmptyPatchError.js';
 import { EmailAlreadyInUseError } from '../../domain/user/errors/EmailAlreadyInUseError.js';
@@ -12,7 +13,7 @@ import type { IUserRepository } from '../ports/outbound/IUserRepository.js';
 const userActor = User.create({
   id: 1,
   name: 'User One',
-  email: 'user@example.com',
+  email: Email.create('user@example.com'),
   password: 'hash1',
   role: Role.USER,
   accessToken: 'tok1',
@@ -20,7 +21,7 @@ const userActor = User.create({
 const adminActor = User.create({
   id: 2,
   name: 'Admin Two',
-  email: 'admin@example.com',
+  email: Email.create('admin@example.com'),
   password: 'hash2',
   role: Role.ADMIN,
   accessToken: 'tok2',
@@ -28,7 +29,7 @@ const adminActor = User.create({
 const targetUser = User.create({
   id: 3,
   name: 'Target Three',
-  email: 'target@example.com',
+  email: Email.create('target@example.com'),
   password: 'hash3',
   role: Role.USER,
   accessToken: 'tok3',
@@ -148,7 +149,7 @@ describe('UpdateUserUseCase', () => {
     const conflictUser = User.create({
       id: 99,
       name: 'Conflict',
-      email: 'taken@example.com',
+      email: Email.create('taken@example.com'),
       password: 'hash',
       role: Role.USER,
       accessToken: 'tok',

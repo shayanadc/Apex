@@ -2,6 +2,7 @@ import { describe, it, expect, vi } from 'vitest';
 import { DeleteUserUseCase } from '../usecases/DeleteUserUseCase.js';
 import { User } from '../../domain/user/User.js';
 import { Role } from '../../domain/user/Role.js';
+import { Email } from '../../domain/user/Email.js';
 import { UserNotFoundError } from '../errors/UserNotFoundError.js';
 import { ForbiddenError } from '../../domain/user/errors/ForbiddenError.js';
 import { CannotDeleteSelfError } from '../../domain/user/errors/CannotDeleteSelfError.js';
@@ -11,7 +12,7 @@ import type { IUserRepository } from '../ports/outbound/IUserRepository.js';
 const adminActor = User.create({
   id: 1,
   name: 'Admin One',
-  email: 'admin@example.com',
+  email: Email.create('admin@example.com'),
   password: 'hash1',
   role: Role.ADMIN,
   accessToken: 'tok1',
@@ -19,7 +20,7 @@ const adminActor = User.create({
 const userActor = User.create({
   id: 2,
   name: 'User Two',
-  email: 'user@example.com',
+  email: Email.create('user@example.com'),
   password: 'hash2',
   role: Role.USER,
   accessToken: 'tok2',
@@ -27,7 +28,7 @@ const userActor = User.create({
 const otherUser = User.create({
   id: 3,
   name: 'Other Three',
-  email: 'other@example.com',
+  email: Email.create('other@example.com'),
   password: 'hash3',
   role: Role.USER,
   accessToken: 'tok3',

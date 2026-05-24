@@ -1,5 +1,6 @@
 import { createHash } from 'node:crypto';
 import { Role } from '../../../../../domain/user/Role.js';
+import { Email } from '../../../../../domain/user/Email.js';
 import type { NewUserData } from '../../../../../domain/user/User.js';
 import type { IUserRepository } from '../../../../../application/ports/outbound/IUserRepository.js';
 
@@ -16,21 +17,21 @@ export const PLAIN_TOKENS: { 1: string; 2: string; 3: string } = {
 const SEED_USERS: NewUserData[] = [
   {
     name: 'John Doe',
-    email: 'john@example.com',
+    email: Email.create('john@example.com'),
     password: 'password1',
     role: Role.USER,
     accessToken: sha256(PLAIN_TOKENS[1]),
   },
   {
     name: 'Jane Doe',
-    email: 'jane@example.com',
+    email: Email.create('jane@example.com'),
     password: 'password2',
     role: Role.ADMIN,
     accessToken: sha256(PLAIN_TOKENS[2]),
   },
   {
     name: 'Bob Smith',
-    email: 'bob@example.com',
+    email: Email.create('bob@example.com'),
     password: 'password3',
     role: Role.USER,
     accessToken: sha256(PLAIN_TOKENS[3]),

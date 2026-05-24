@@ -1,12 +1,13 @@
 import { describe, it, expect } from 'vitest';
 import { User, type UserState } from '../User.js';
 import { Role } from '../Role.js';
+import { Email } from '../Email.js';
 
 const makeUser = (overrides: Partial<UserState> = {}): User =>
   User.create({
     id: 1,
     name: 'Alice',
-    email: 'alice@example.com',
+    email: Email.create('alice@example.com'),
     password: 'hashed',
     accessToken: 'tok-1',
     role: Role.USER,

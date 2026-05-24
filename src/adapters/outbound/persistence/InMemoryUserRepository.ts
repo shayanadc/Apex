@@ -1,4 +1,5 @@
 import { User, type NewUserData } from '../../../domain/user/User.js';
+import type { Email } from '../../../domain/user/Email.js';
 import type { IUserRepository } from '../../../application/ports/outbound/IUserRepository.js';
 import { UserNotFoundError } from '../../../application/errors/UserNotFoundError.js';
 
@@ -14,8 +15,8 @@ export class InMemoryUserRepository implements IUserRepository {
     return Promise.resolve(user);
   }
 
-  findByEmail(email: string): Promise<User | null> {
-    const user = this.users.find((u) => u.getEmail() === email) ?? null;
+  findByEmail(email: Email): Promise<User | null> {
+    const user = this.users.find((u) => u.getEmail().equals(email)) ?? null;
     return Promise.resolve(user);
   }
 

@@ -19,7 +19,7 @@ export class GetUserUseCase {
     return {
       id: targetUser.getId(),
       name: targetUser.getName(),
-      email: targetUser.getEmail(),
+      email: targetUser.getEmail().getValue(),
       role: targetUser.getRole().getValue(),
     };
   }

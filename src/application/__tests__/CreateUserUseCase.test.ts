@@ -2,6 +2,7 @@ import { describe, it, expect, vi, type Mock } from 'vitest';
 import { CreateUserUseCase } from '../usecases/CreateUserUseCase.js';
 import { User, type NewUserData } from '../../domain/user/User.js';
 import { Role } from '../../domain/user/Role.js';
+import { Email } from '../../domain/user/Email.js';
 import { EmailAlreadyInUseError } from '../../domain/user/errors/EmailAlreadyInUseError.js';
 import { ForbiddenError } from '../../domain/user/errors/ForbiddenError.js';
 import { InvalidUserError } from '../../domain/user/errors/InvalidUserError.js';
@@ -16,7 +17,7 @@ const sha256 = (plain: string): string => createHash('sha256').update(plain).dig
 const adminActor = User.create({
   id: 1,
   name: 'Admin',
-  email: 'admin@example.com',
+  email: Email.create('admin@example.com'),
   password: 'hashed',
   role: Role.ADMIN,
   accessToken: 'tok-admin',
@@ -24,7 +25,7 @@ const adminActor = User.create({
 const userActor = User.create({
   id: 2,
   name: 'Regular',
-  email: 'user@example.com',
+  email: Email.create('user@example.com'),
   password: 'hashed',
   role: Role.USER,
   accessToken: 'tok-user',
@@ -115,7 +116,7 @@ describe('CreateUserUseCase', () => {
     const existing = User.create({
       id: 7,
       name: 'Existing',
-      email: 'charlie@example.com',
+      email: Email.create('charlie@example.com'),
       password: 'h',
       role: Role.USER,
       accessToken: 't',
