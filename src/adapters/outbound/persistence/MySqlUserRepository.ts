@@ -1,6 +1,7 @@
 import type { Pool, RowDataPacket, ResultSetHeader } from 'mysql2/promise';
 import { User, type NewUserData, type UserId } from '../../../domain/user/User.js';
 import { Role } from '../../../domain/user/Role.js';
+import { Email } from '../../../domain/user/Email.js';
 import type { IUserRepository } from '../../../application/ports/outbound/IUserRepository.js';
 import { UserNotFoundError } from '../../../application/errors/UserNotFoundError.js';
 
@@ -13,11 +14,15 @@ interface UserRow extends RowDataPacket {
   role: 'USER' | 'ADMIN';
 }
 
+const SELECT_USER = 'SELECT id, name, email, password, access_token, role FROM users';
+
+type LookupColumn = 'id' | 'email' | 'access_token';
+
 function rowToUser(row: UserRow): User {
   return User.reconstitute({
     id: row.id,
     name: row.name,
-    email: row.email,
+    email: Email.create(row.email),
     password: row.password,
     accessToken: row.access_token ?? '',
     role: Role.from(row.role),
@@ -28,40 +33,32 @@ export class MySqlUserRepository implements IUserRepository {
   constructor(private readonly pool: Pool) {}
 
   async findAll(): Promise<User[]> {
-    const [rows] = await this.pool.execute<UserRow[]>(
-      'SELECT id, name, email, password, access_token, role FROM users',
-    );
+    const [rows] = await this.pool.execute<UserRow[]>(SELECT_USER);
     return rows.map(rowToUser);
   }
 
-  async findById(id: UserId): Promise<User | null> {
-    const [rows] = await this.pool.execute<UserRow[]>(
-      'SELECT id, name, email, password, access_token, role FROM users WHERE id = ?',
-      [id],
-    );
-    return rows.length > 0 ? rowToUser(rows[0]!) : null;
+  findById(id: UserId): Promise<User | null> {
+    return this.findOneBy('id', id);
   }
 
-  async findByEmail(email: string): Promise<User | null> {
-    const [rows] = await this.pool.execute<UserRow[]>(
-      'SELECT id, name, email, password, access_token, role FROM users WHERE email = ?',
-      [email],
-    );
-    return rows.length > 0 ? rowToUser(rows[0]!) : null;
+  findByEmail(email: Email): Promise<User | null> {
+    return this.findOneBy('email', email.getValue());
   }
 
-  async findByHashedToken(hash: string): Promise<User | null> {
-    const [rows] = await this.pool.execute<UserRow[]>(
-      'SELECT id, name, email, password, access_token, role FROM users WHERE access_token = ?',
-      [hash],
-    );
-    return rows.length > 0 ? rowToUser(rows[0]!) : null;
+  findByHashedToken(hash: string): Promise<User | null> {
+    return this.findOneBy('access_token', hash);
   }
 
   async save(draft: NewUserData): Promise<User> {
     const [result] = await this.pool.execute<ResultSetHeader>(
       'INSERT INTO users (name, email, password, access_token, role) VALUES (?, ?, ?, ?, ?)',
-      [draft.name, draft.email, draft.password, draft.accessToken || null, draft.role.getValue()],
+      [
+        draft.name,
+        draft.email.getValue(),
+        draft.password,
+        draft.accessToken,
+        draft.role.getValue(),
+      ],
     );
 
     return User.reconstitute({
@@ -80,9 +77,9 @@ export class MySqlUserRepository implements IUserRepository {
       'UPDATE users SET name = ?, email = ?, password = ?, access_token = ?, role = ? WHERE id = ?',
       [
         state.name,
-        state.email,
+        state.email.getValue(),
         state.password,
-        state.accessToken || null,
+        state.accessToken,
         state.role.getValue(),
         state.id,
       ],
@@ -103,5 +100,13 @@ export class MySqlUserRepository implements IUserRepository {
     if (result.affectedRows === 0) {
       throw new UserNotFoundError(id);
     }
+  }
+
+  private async findOneBy(column: LookupColumn, value: string | number): Promise<User | null> {
+    const [rows] = await this.pool.execute<UserRow[]>(`${SELECT_USER} WHERE ${column} = ?`, [
+      value,
+    ]);
+    const row = rows[0];
+    return row ? rowToUser(row) : null;
   }
 }

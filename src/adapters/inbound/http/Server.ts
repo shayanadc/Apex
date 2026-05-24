@@ -1,11 +1,10 @@
 import { Hono } from 'hono';
-import type { Context } from 'hono';
 import { serve } from '@hono/node-server';
 import type { Container } from '../../../composition/Container.js';
 import { AuthMiddleware } from './middleware/AuthMiddleware.js';
 import type { AuthVariables } from './middleware/AuthMiddleware.js';
 import { HttpErrorBoundary } from './presentation/HttpErrorBoundary.js';
-import { JSON_API_CONTENT_TYPE } from './presentation/JsonApiResponder.js';
+import { JsonApiResponder } from './presentation/JsonApiResponder.js';
 import { UserRouter } from './UserRouter.js';
 
 type AppEnv = { Variables: AuthVariables };
@@ -15,6 +14,7 @@ export class Server {
 
   constructor(container: Container) {
     const errorBoundary = new HttpErrorBoundary();
+    const responder = new JsonApiResponder();
     const authMiddleware = new AuthMiddleware(container.userRepository, container.tokenIssuer);
     const userRouter = new UserRouter(
       container.listUsersHandler,
@@ -29,9 +29,7 @@ export class Server {
     this.app.use('/api/*', (c, next) => authMiddleware.handle(c, next));
     this.app.route('/api', userRouter.instance);
 
-    this.app.get('/health', (c: Context) =>
-      c.json({ meta: { status: 'ok' } }, 200, { 'Content-Type': JSON_API_CONTENT_TYPE }),
-    );
+    this.app.get('/health', (c) => responder.meta(c, { status: 'ok' }));
   }
 
   start(port: number): void {

@@ -1,7 +1,9 @@
-import type { User, UserState, UserId } from '../../../domain/user/User.js';
+import type { User, UserId } from '../../../domain/user/User.js';
 import type { RoleValue } from '../../../domain/user/Role.js';
 
-type UpdatableFields = Partial<Readonly<Pick<UserState, 'name' | 'email'>>> & {
+type UpdatableFields = {
+  readonly name?: string;
+  readonly email?: string;
   readonly role?: RoleValue;
 };
 
