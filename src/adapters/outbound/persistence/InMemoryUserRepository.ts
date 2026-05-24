@@ -1,4 +1,4 @@
-import type { User } from '../../../domain/user/User.js';
+import { User, type NewUserData } from '../../../domain/user/User.js';
 import type { IUserRepository } from '../../../application/ports/outbound/IUserRepository.js';
 import { UserNotFoundError } from '../../../application/errors/UserNotFoundError.js';
 
@@ -24,9 +24,10 @@ export class InMemoryUserRepository implements IUserRepository {
     return Promise.resolve(user);
   }
 
-  save(user: User): Promise<void> {
+  save(draft: NewUserData): Promise<User> {
+    const user = User.create({ id: this.users.length + 1, ...draft });
     this.users.push(user);
-    return Promise.resolve();
+    return Promise.resolve(user);
   }
 
   update(user: User): Promise<User> {

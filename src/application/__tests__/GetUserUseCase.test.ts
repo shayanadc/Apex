@@ -7,7 +7,7 @@ import { ForbiddenError } from '../../domain/user/errors/ForbiddenError.js';
 import { makeMockUserRepository } from './__helper__/makeMockUserRepository.js';
 import type { IUserRepository } from '../ports/outbound/IUserRepository.js';
 
-const userActor = new User({
+const userActor = User.create({
   id: 1,
   name: 'User One',
   email: 'user@example.com',
@@ -15,7 +15,7 @@ const userActor = new User({
   role: Role.USER,
   accessToken: 'tok1',
 });
-const adminActor = new User({
+const adminActor = User.create({
   id: 2,
   name: 'Admin Two',
   email: 'admin@example.com',
@@ -23,7 +23,7 @@ const adminActor = new User({
   role: Role.ADMIN,
   accessToken: 'tok2',
 });
-const otherUser = new User({
+const otherUser = User.create({
   id: 3,
   name: 'Other Three',
   email: 'other@example.com',

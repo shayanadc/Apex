@@ -1,5 +1,6 @@
 import type { Context } from 'hono';
 import type { AuthVariables } from '../middleware/AuthMiddleware.js';
+import type { UserId } from '../../../../domain/user/User.js';
 import { RequestValidationError } from '../errors/RequestValidationError.js';
 import { JsonApiResponder } from '../presentation/JsonApiResponder.js';
 import { HttpErrorBoundary } from '../presentation/HttpErrorBoundary.js';
@@ -29,7 +30,7 @@ export abstract class BaseHttpHandler {
 
   protected abstract execute(c: AuthContext): Promise<Response>;
 
-  protected parseId(raw: string | undefined): number {
+  protected parseId(raw: string | undefined): UserId {
     const id = parseInt(raw ?? '', 10);
 
     if (!Number.isInteger(id) || id <= 0) {

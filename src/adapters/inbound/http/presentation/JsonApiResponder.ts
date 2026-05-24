@@ -15,6 +15,10 @@ export class JsonApiResponder {
     return this.send(c, { data }, 200);
   }
 
+  created(c: Context, data: unknown): Response {
+    return this.send(c, { data }, 201);
+  }
+
   noContent(c: Context): Response {
     return c.body(null, 204);
   }

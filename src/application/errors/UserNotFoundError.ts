@@ -1,4 +1,5 @@
 import { ApplicationError } from './ApplicationError.js';
+import type { UserId } from '../../domain/user/User.js';
 
 /**
  * Application error returned by the IUserRepository port contract when a
@@ -6,9 +7,9 @@ import { ApplicationError } from './ApplicationError.js';
  * it (translating any driver-level "no rows" signal into this type).
  */
 export class UserNotFoundError extends ApplicationError {
-  public readonly id: number;
+  public readonly id: UserId;
 
-  constructor(id: number) {
+  constructor(id: UserId) {
     super('USER_NOT_FOUND', `User with id ${id} not found`);
     this.id = id;
   }

@@ -6,6 +6,7 @@ import { EmailAlreadyInUseError } from '../../../../domain/user/errors/EmailAlre
 import { ForbiddenError } from '../../../../domain/user/errors/ForbiddenError.js';
 import { CannotDeleteSelfError } from '../../../../domain/user/errors/CannotDeleteSelfError.js';
 import { InvalidUserError } from '../../../../domain/user/errors/InvalidUserError.js';
+import { InvalidRoleError } from '../../../../domain/user/errors/InvalidRoleError.js';
 import { RoleTransitionError } from '../../../../domain/user/errors/RoleTransitionError.js';
 import type { HttpError } from '../errors/HttpError.js';
 import { RequestValidationError } from '../errors/RequestValidationError.js';
@@ -30,6 +31,7 @@ export class HttpErrorTranslator implements ErrorTranslator {
       [EmailAlreadyInUseError, 422],
       [EmptyPatchError, 422],
       [InvalidUserError, 422],
+      [InvalidRoleError, 422],
       [RoleTransitionError, 422],
       [RequestValidationError, 422],
     ];

@@ -1,6 +1,9 @@
+import type { UserId } from '../../../domain/user/User.js';
+import type { Role } from '../../../domain/user/Role.js';
+
 export type UserView = {
-  id: number;
+  id: UserId;
   name: string;
   email: string;
-  role: 'USER' | 'ADMIN';
+  role: ReturnType<Role['getValue']>;
 };

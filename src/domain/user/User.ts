@@ -4,8 +4,10 @@ import { ForbiddenError } from './errors/ForbiddenError.js';
 import { CannotDeleteSelfError } from './errors/CannotDeleteSelfError.js';
 import { Role } from './Role.js';
 
-export type UserProps = {
-  id: number;
+export type UserId = number;
+
+export type UserState = {
+  id: UserId;
   name: string;
   email: string;
   password: string;
@@ -13,37 +15,54 @@ export type UserProps = {
   role: Role;
 };
 
+export type NewUserData = Omit<UserState, 'id'>;
+
 export class User {
-  private readonly id: number;
+  private readonly id: UserId;
   private name: string;
   private email: string;
   private accessToken: string;
   private password: string;
   private role: Role;
 
-  constructor(props: UserProps) {
-    if (!Number.isInteger(props.id) || props.id <= 0) {
-      throw new InvalidUserError('User id must be a positive integer');
-    }
-    if (!props.name?.trim()) {
-      throw new InvalidUserError('User name is required');
-    }
-    if (!isValidEmail(props.email)) {
-      throw new InvalidUserError('User email is invalid');
-    }
-    if (!props.password?.trim()) {
-      throw new InvalidUserError('Password hash is required');
-    }
-
-    this.id = props.id;
-    this.name = props.name.trim();
-    this.email = props.email.trim().toLowerCase();
-    this.password = props.password;
-    this.accessToken = props.accessToken;
-    this.role = props.role;
+  private constructor(state: UserState) {
+    this.id = state.id;
+    this.name = state.name;
+    this.email = state.email;
+    this.password = state.password;
+    this.accessToken = state.accessToken;
+    this.role = state.role;
   }
 
-  getId(): number {
+  /**
+   * Births a new aggregate. Enforces every invariant and normalises input
+   * (trim name, lowercase email). Use this when a User is being created.
+   */
+  static create(state: UserState): User {
+    if (!Number.isInteger(state.id) || state.id <= 0) {
+      throw new InvalidUserError('User id must be a positive integer');
+    }
+    if (!state.name?.trim()) {
+      throw new InvalidUserError('User name is required');
+    }
+    if (!isValidEmail(state.email)) {
+      throw new InvalidUserError('User email is invalid');
+    }
+    if (!state.password?.trim()) {
+      throw new InvalidUserError('Password hash is required');
+    }
+    return new User({
+      ...state,
+      name: state.name.trim(),
+      email: state.email.trim().toLowerCase(),
+    });
+  }
+
+  static reconstitute(state: UserState): User {
+    return new User(state);
+  }
+
+  getId(): UserId {
     return this.id;
   }
   getName(): string {
@@ -80,12 +99,12 @@ export class User {
     else this.demoteToUser();
   }
 
-  promoteToAdmin(): void {
+  private promoteToAdmin(): void {
     if (this.role.isAdmin()) throw new RoleTransitionError('User is already an admin');
     this.role = Role.ADMIN;
   }
 
-  demoteToUser(): void {
+  private demoteToUser(): void {
     if (!this.role.isAdmin()) throw new RoleTransitionError('User is already a regular user');
     this.role = Role.USER;
   }
@@ -94,7 +113,11 @@ export class User {
     if (!this.role.isAdmin()) throw new ForbiddenError();
   }
 
-  assertCanReference(targetId: number): void {
+  assertCanCreateUsers(): void {
+    if (!this.role.isAdmin()) throw new ForbiddenError();
+  }
+
+  assertCanReference(targetId: UserId): void {
     if (this.role.isAdmin() || this.id === targetId) return;
     throw new ForbiddenError();
   }

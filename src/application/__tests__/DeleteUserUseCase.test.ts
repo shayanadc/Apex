@@ -8,7 +8,7 @@ import { CannotDeleteSelfError } from '../../domain/user/errors/CannotDeleteSelf
 import { makeMockUserRepository } from './__helper__/makeMockUserRepository.js';
 import type { IUserRepository } from '../ports/outbound/IUserRepository.js';
 
-const adminActor = new User({
+const adminActor = User.create({
   id: 1,
   name: 'Admin One',
   email: 'admin@example.com',
@@ -16,7 +16,7 @@ const adminActor = new User({
   role: Role.ADMIN,
   accessToken: 'tok1',
 });
-const userActor = new User({
+const userActor = User.create({
   id: 2,
   name: 'User Two',
   email: 'user@example.com',
@@ -24,7 +24,7 @@ const userActor = new User({
   role: Role.USER,
   accessToken: 'tok2',
 });
-const otherUser = new User({
+const otherUser = User.create({
   id: 3,
   name: 'Other Three',
   email: 'other@example.com',

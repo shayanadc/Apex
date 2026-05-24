@@ -9,7 +9,7 @@ import { ForbiddenError } from '../../domain/user/errors/ForbiddenError.js';
 import { makeMockUserRepository } from './__helper__/makeMockUserRepository.js';
 import type { IUserRepository } from '../ports/outbound/IUserRepository.js';
 
-const userActor = new User({
+const userActor = User.create({
   id: 1,
   name: 'User One',
   email: 'user@example.com',
@@ -17,7 +17,7 @@ const userActor = new User({
   role: Role.USER,
   accessToken: 'tok1',
 });
-const adminActor = new User({
+const adminActor = User.create({
   id: 2,
   name: 'Admin Two',
   email: 'admin@example.com',
@@ -25,7 +25,7 @@ const adminActor = new User({
   role: Role.ADMIN,
   accessToken: 'tok2',
 });
-const targetUser = new User({
+const targetUser = User.create({
   id: 3,
   name: 'Target Three',
   email: 'target@example.com',
@@ -145,7 +145,7 @@ describe('UpdateUserUseCase', () => {
   });
 
   it('duplicate email → EmailAlreadyInUseError, update not called', async () => {
-    const conflictUser = new User({
+    const conflictUser = User.create({
       id: 99,
       name: 'Conflict',
       email: 'taken@example.com',

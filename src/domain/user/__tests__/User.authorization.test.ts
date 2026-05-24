@@ -1,11 +1,11 @@
 import { describe, it, expect } from 'vitest';
-import { User, type UserProps } from '../User.js';
+import { User, type UserState } from '../User.js';
 import { Role } from '../Role.js';
 import { ForbiddenError } from '../errors/ForbiddenError.js';
 import { CannotDeleteSelfError } from '../errors/CannotDeleteSelfError.js';
 
-const makeUser = (overrides: Partial<UserProps> = {}): User =>
-  new User({
+const makeUser = (overrides: Partial<UserState> = {}): User =>
+  User.create({
     id: 1,
     name: 'Alice',
     email: 'alice@example.com',
@@ -26,6 +26,16 @@ describe('User — assertCanListAll', () => {
 
   it('USER cannot list all users', () => {
     expect(() => userA.assertCanListAll()).toThrow(ForbiddenError);
+  });
+});
+
+describe('User — assertCanCreateUsers', () => {
+  it('ADMIN can create users', () => {
+    expect(() => admin.assertCanCreateUsers()).not.toThrow();
+  });
+
+  it('USER cannot create users', () => {
+    expect(() => userA.assertCanCreateUsers()).toThrow(ForbiddenError);
   });
 });
 

@@ -1,10 +1,9 @@
 import { describe, it, expect } from 'vitest';
-import { User, type UserProps } from '../User.js';
+import { User, type UserState } from '../User.js';
 import { Role } from '../Role.js';
-import { RoleTransitionError } from '../errors/RoleTransitionError.js';
 
-const makeUser = (overrides: Partial<UserProps> = {}): User =>
-  new User({
+const makeUser = (overrides: Partial<UserState> = {}): User =>
+  User.create({
     id: 1,
     name: 'Alice',
     email: 'alice@example.com',
@@ -37,17 +36,5 @@ describe('User — changeRole', () => {
     const user = makeUser({ role: Role.ADMIN });
     expect(() => user.changeRole(Role.ADMIN)).not.toThrow();
     expect(user.getRole().getValue()).toBe('ADMIN');
-  });
-});
-
-describe('User — promoteToAdmin / demoteToUser (direct)', () => {
-  it('throws RoleTransitionError when promoting an already-ADMIN user', () => {
-    const user = makeUser({ role: Role.ADMIN });
-    expect(() => user.promoteToAdmin()).toThrow(RoleTransitionError);
-  });
-
-  it('throws RoleTransitionError when demoting an already-USER user', () => {
-    const user = makeUser({ role: Role.USER });
-    expect(() => user.demoteToUser()).toThrow(RoleTransitionError);
   });
 });

@@ -5,7 +5,7 @@ import { Role } from '../../domain/user/Role.js';
 import { ForbiddenError } from '../../domain/user/errors/ForbiddenError.js';
 import { makeMockUserRepository } from './__helper__/makeMockUserRepository.js';
 
-const adminActor = new User({
+const adminActor = User.create({
   id: 1,
   name: 'Admin One',
   email: 'admin@example.com',
@@ -13,7 +13,7 @@ const adminActor = new User({
   role: Role.ADMIN,
   accessToken: 'tok1',
 });
-const userActor = new User({
+const userActor = User.create({
   id: 2,
   name: 'User Two',
   email: 'user@example.com',

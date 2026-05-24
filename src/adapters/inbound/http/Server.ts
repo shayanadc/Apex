@@ -15,10 +15,11 @@ export class Server {
 
   constructor(container: Container) {
     const errorBoundary = new HttpErrorBoundary();
-    const authMiddleware = new AuthMiddleware(container.userRepository);
+    const authMiddleware = new AuthMiddleware(container.userRepository, container.tokenIssuer);
     const userRouter = new UserRouter(
       container.listUsersHandler,
       container.getUserHandler,
+      container.createUserHandler,
       container.updateUserHandler,
       container.deleteUserHandler,
     );
