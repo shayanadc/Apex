@@ -79,4 +79,12 @@ describe('DeleteUserUseCase', () => {
     ).rejects.toThrow(UserNotFoundError);
     expect(repo.delete).not.toHaveBeenCalled();
   });
+
+  it('USER deletes non-existent id that is not their own → ForbiddenError (no existence leak)', async () => {
+    const repo = makeRepo(null);
+    await expect(
+      new DeleteUserUseCase(repo).execute({ actor: userActor, targetId: 99 }),
+    ).rejects.toThrow(ForbiddenError);
+    expect(repo.delete).not.toHaveBeenCalled();
+  });
 });

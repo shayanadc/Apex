@@ -22,6 +22,7 @@ export class UpdateUserUseCase {
     const existingUser = await this.userRepository.findById(targetId);
 
     if (existingUser === null) {
+      actor.assertCanReference(targetId);
       throw new UserNotFoundError(targetId);
     }
 

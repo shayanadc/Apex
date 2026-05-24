@@ -2,7 +2,6 @@ import type { IUserRepository } from '../ports/outbound/IUserRepository.js';
 import type { UserView } from '../ports/inbound/UserView.js';
 import type { GetUserCommand } from '../ports/inbound/GetUserCommand.js';
 import { UserNotFoundError } from '../errors/UserNotFoundError.js';
-import { ForbiddenError } from '../../domain/user/errors/ForbiddenError.js';
 
 export class GetUserUseCase {
   constructor(private readonly userRepository: IUserRepository) {}
@@ -11,9 +10,7 @@ export class GetUserUseCase {
     const targetUser = await this.userRepository.findById(command.targetId);
 
     if (targetUser === null) {
-      if (!command.actor.getRole().isAdmin() && command.actor.getId() !== command.targetId) {
-        throw new ForbiddenError();
-      }
+      command.actor.assertCanReference(command.targetId);
       throw new UserNotFoundError(command.targetId);
     }
 

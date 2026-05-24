@@ -29,6 +29,22 @@ describe('User — assertCanListAll', () => {
   });
 });
 
+describe('User — assertCanReference', () => {
+  it('ADMIN can reference any id (even non-existent)', () => {
+    expect(() => admin.assertCanReference(2)).not.toThrow();
+    expect(() => admin.assertCanReference(99)).not.toThrow();
+  });
+
+  it('USER can reference their own id', () => {
+    expect(() => userA.assertCanReference(2)).not.toThrow();
+  });
+
+  it("USER cannot reference another user's id (no existence leak)", () => {
+    expect(() => userA.assertCanReference(3)).toThrow(ForbiddenError);
+    expect(() => userA.assertCanReference(99)).toThrow(ForbiddenError);
+  });
+});
+
 describe('User — assertCanView', () => {
   it('USER can view their own profile', () => {
     expect(() => userA.assertCanView(userA)).not.toThrow();

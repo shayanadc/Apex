@@ -46,12 +46,12 @@ describe('UpdateUserHandler', () => {
     });
   });
 
-  it('returns 404 when user is not found', async () => {
+  it('ADMIN patches non-existent user → 404 Not Found', async () => {
     const res = await app.request('/api/users/99', {
       method: 'PATCH',
       headers: {
         'Content-Type': 'application/json',
-        Authorization: `Bearer ${PLAIN_TOKENS[1]}`,
+        Authorization: `Bearer ${PLAIN_TOKENS[2]}`, // user 2 is ADMIN
       },
       body: JSON.stringify({ name: 'Test' }),
     });
@@ -60,6 +60,23 @@ describe('UpdateUserHandler', () => {
     const body = await res.json();
     expect(body).toMatchObject({
       errors: [{ status: '404', title: 'Not Found', detail: 'User with id 99 not found' }],
+    });
+  });
+
+  it('USER patches non-existent id that is not their own → 403 (no existence leak)', async () => {
+    const res = await app.request('/api/users/99', {
+      method: 'PATCH',
+      headers: {
+        'Content-Type': 'application/json',
+        Authorization: `Bearer ${PLAIN_TOKENS[1]}`, // user 1 (USER) probing id 99
+      },
+      body: JSON.stringify({ name: 'Test' }),
+    });
+
+    expect(res.status).toBe(403);
+    const body = await res.json();
+    expect(body).toMatchObject({
+      errors: [{ status: '403', title: 'Forbidden' }],
     });
   });
 

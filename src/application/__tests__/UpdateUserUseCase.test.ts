@@ -122,6 +122,28 @@ describe('UpdateUserUseCase', () => {
     expect(repo.update).not.toHaveBeenCalled();
   });
 
+  it('USER updates non-existent id that is not their own → ForbiddenError (no existence leak)', async () => {
+    const repo = makeRepo(null);
+    await expect(
+      new UpdateUserUseCase(repo).execute({
+        actor: userActor,
+        targetUser: { id: 99, name: 'Test' },
+      }),
+    ).rejects.toThrow(ForbiddenError);
+    expect(repo.update).not.toHaveBeenCalled();
+  });
+
+  it('USER updates non-existent id that is their own → UserNotFoundError', async () => {
+    const repo = makeRepo(null);
+    await expect(
+      new UpdateUserUseCase(repo).execute({
+        actor: userActor,
+        targetUser: { id: 1, name: 'Test' },
+      }),
+    ).rejects.toThrow(UserNotFoundError);
+    expect(repo.update).not.toHaveBeenCalled();
+  });
+
   it('duplicate email → EmailAlreadyInUseError, update not called', async () => {
     const conflictUser = new User({
       id: 99,

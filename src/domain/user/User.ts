@@ -94,6 +94,11 @@ export class User {
     if (!this.role.isAdmin()) throw new ForbiddenError();
   }
 
+  assertCanReference(targetId: number): void {
+    if (this.role.isAdmin() || this.id === targetId) return;
+    throw new ForbiddenError();
+  }
+
   assertCanView(target: User): void {
     if (this.role.isAdmin() || this.id === target.id) return;
     throw new ForbiddenError();

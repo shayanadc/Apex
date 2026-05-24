@@ -43,6 +43,19 @@ describe('DeleteUserHandler', () => {
     expect(res.status).toBe(403);
   });
 
+  it('USER deletes non-existent id that is not their own → 403 (no existence leak)', async () => {
+    const res = await app.request('/api/users/99', {
+      method: 'DELETE',
+      headers: { Authorization: `Bearer ${PLAIN_TOKENS[1]}` }, // user 1 (USER) probing id 99
+    });
+
+    expect(res.status).toBe(403);
+    const body = await res.json();
+    expect(body).toMatchObject({
+      errors: [{ status: '403', title: 'Forbidden' }],
+    });
+  });
+
   it('ADMIN deletes non-existent user → 404 Not Found', async () => {
     const res = await app.request('/api/users/99', {
       method: 'DELETE',

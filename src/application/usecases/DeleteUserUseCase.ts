@@ -9,6 +9,7 @@ export class DeleteUserUseCase {
     const targetUser = await this.userRepository.findById(command.targetId);
 
     if (targetUser === null) {
+      command.actor.assertCanReference(command.targetId);
       throw new UserNotFoundError(command.targetId);
     }
 
