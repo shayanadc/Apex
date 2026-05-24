@@ -24,7 +24,8 @@ export class CreateUserUseCase {
     }
     const role = Role.from(rawRole);
 
-    const emailOwner = await this.userRepository.findByEmail(email?.trim().toLowerCase() ?? '');
+    const normalizedEmail = email?.trim().toLowerCase() ?? '';
+    const emailOwner = await this.userRepository.findByEmail(normalizedEmail);
     if (emailOwner !== null) {
       throw new EmailAlreadyInUseError(email);
     }
@@ -34,7 +35,7 @@ export class CreateUserUseCase {
 
     const user = await this.userRepository.save({
       name,
-      email,
+      email: normalizedEmail,
       password: passwordHash,
       accessToken: token.hash,
       role,

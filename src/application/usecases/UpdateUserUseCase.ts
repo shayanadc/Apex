@@ -33,7 +33,8 @@ export class UpdateUserUseCase {
     }
 
     if (email !== undefined) {
-      const existing = await this.userRepository.findByEmail(email);
+      const normalizedEmail = email.trim().toLowerCase();
+      const existing = await this.userRepository.findByEmail(normalizedEmail);
       if (existing !== null && existing.getId() !== targetId) {
         throw new EmailAlreadyInUseError(email);
       }
