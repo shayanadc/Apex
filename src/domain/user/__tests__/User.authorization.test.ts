@@ -19,6 +19,16 @@ const admin = makeUser({ id: 1, role: Role.ADMIN });
 const userA = makeUser({ id: 2, role: Role.USER });
 const userB = makeUser({ id: 3, role: Role.USER });
 
+describe('User — assertCanListAll', () => {
+  it('ADMIN can list all users', () => {
+    expect(() => admin.assertCanListAll()).not.toThrow();
+  });
+
+  it('USER cannot list all users', () => {
+    expect(() => userA.assertCanListAll()).toThrow(ForbiddenError);
+  });
+});
+
 describe('User — assertCanView', () => {
   it('USER can view their own profile', () => {
     expect(() => userA.assertCanView(userA)).not.toThrow();

@@ -90,6 +90,10 @@ export class User {
     this.role = Role.USER;
   }
 
+  assertCanListAll(): void {
+    if (!this.role.isAdmin()) throw new ForbiddenError();
+  }
+
   assertCanView(target: User): void {
     if (this.role.isAdmin() || this.id === target.id) return;
     throw new ForbiddenError();
