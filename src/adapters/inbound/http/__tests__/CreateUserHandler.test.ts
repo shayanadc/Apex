@@ -57,7 +57,7 @@ describe('CreateUserHandler', () => {
       body: JSON.stringify({
         name: 'Dana',
         email: 'dana@example.com',
-        password: 'pw',
+        password: 'pass',
         role: 'USER',
       }),
     });
@@ -86,7 +86,7 @@ describe('CreateUserHandler', () => {
       body: JSON.stringify({
         name: 'Eve',
         email: 'eve@example.com',
-        password: 'pw',
+        password: 'pass',
         role: 'ADMIN',
       }),
     });
@@ -105,7 +105,7 @@ describe('CreateUserHandler', () => {
       body: JSON.stringify({
         name: 'Eve',
         email: 'eve@example.com',
-        password: 'pw',
+        password: 'pass',
         role: 'USER',
       }),
     });
@@ -122,7 +122,7 @@ describe('CreateUserHandler', () => {
       body: JSON.stringify({
         name: 'Clone',
         email: 'john@example.com',
-        password: 'pw',
+        password: 'pass',
         role: 'USER',
       }),
     });
@@ -144,7 +144,7 @@ describe('CreateUserHandler', () => {
       body: JSON.stringify({
         name: 'Bad',
         email: 'bad@example.com',
-        password: 'pw',
+        password: 'pass',
         role: 'GOD',
       }),
     });
@@ -161,7 +161,7 @@ describe('CreateUserHandler', () => {
       body: JSON.stringify({
         name: 'Bad',
         email: 'not-an-email',
-        password: 'pw',
+        password: 'pass',
         role: 'USER',
       }),
     });

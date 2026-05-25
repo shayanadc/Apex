@@ -3,4 +3,5 @@
 node_modules/
 dist/
 ADR.md
-.github/
+.github/.github
+.idea/

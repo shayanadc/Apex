@@ -11,6 +11,7 @@ import { RoleTransitionError } from '../../../../domain/user/errors/RoleTransiti
 import type { HttpError } from '../errors/HttpError.js';
 import { RequestValidationError } from '../errors/RequestValidationError.js';
 import { UnauthorizedError } from '../errors/UnauthorizedError.js';
+import { ZodError } from 'zod';
 
 export type HttpStatus = 401 | 403 | 404 | 422 | 500;
 
@@ -47,6 +48,10 @@ export class HttpErrorTranslator {
     ];
 
   translate(error: unknown): TranslatedError {
+    if (error instanceof ZodError) {
+      const detail = error.issues.map((e) => `${e.path.join('.')}: ${e.message}`).join(', ');
+      return { status: 422, detail, originalError: error };
+    }
     for (const [ErrorType, status] of HttpErrorTranslator.STATUS_RULES) {
       if (error instanceof ErrorType) {
         return { status, detail: (error as Error).message, originalError: error };
